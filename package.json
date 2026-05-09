@@ -1,0 +1,43 @@
+{
+  "name": "hifdh-health",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NEXT_TEST_WASM_DIR=node_modules/@next/swc-wasm-nodejs next dev",
+    "build": "cross-env NEXT_TEST_WASM_DIR=node_modules/@next/swc-wasm-nodejs next build",
+    "start": "cross-env NEXT_TEST_WASM_DIR=node_modules/@next/swc-wasm-nodejs next start",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.468.0",
+    "next": "15.5.18",
+    "next-themes": "^0.4.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "recharts": "^3.5.1",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^5.0.9"
+  },
+  "devDependencies": {
+    "@next/swc-wasm-nodejs": "^15.5.18",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.22",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "15.5.18",
+    "postcss": "^8.5.6",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "tailwindcss": "^3.4.18",
+    "typescript": "^5.9.3"
+  }
+}
