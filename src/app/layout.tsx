@@ -15,6 +15,12 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>
         <ThemeProvider
           attribute="class"

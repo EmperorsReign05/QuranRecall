@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import type { DecayedAyah, RevisionQueueItem, VerseKey } from "@/types/hifdh";
+import type { DecayedAyah, RevisionQueueItem, VerseKey, AyahContent } from "@/types/hifdh";
 
 export interface RevisionQueueProps {
   items: RevisionQueueItem[];
@@ -16,6 +16,8 @@ export interface RevisionQueueProps {
 export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQueueProps) {
   const [completedItems, setCompletedItems] = useState<Set<VerseKey>>(new Set());
   const [expandedItem, setExpandedItem] = useState<VerseKey | null>(null);
+  const [expandedContent, setExpandedContent] = useState<AyahContent | null>(null);
+  const [isExpandingLoading, setIsExpandingLoading] = useState(false);
 
   const pendingItems = items.filter(item => !completedItems.has(item.ayah.verseKey));
   const totalMinutes = Math.ceil(items.reduce((sum, item) => sum + item.estimatedSeconds, 0) / 60);
@@ -29,17 +31,35 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
     });
     if (expandedItem === verseKey) {
       setExpandedItem(null);
+      setExpandedContent(null);
     }
   };
 
   const handleSkip = (e: React.MouseEvent) => {
     e.stopPropagation();
     setExpandedItem(null);
+    setExpandedContent(null);
   };
 
   const handleReviseClick = (e: React.MouseEvent, verseKey: VerseKey) => {
     e.stopPropagation();
-    setExpandedItem(expandedItem === verseKey ? null : verseKey);
+    if (expandedItem === verseKey) {
+      setExpandedItem(null);
+      setExpandedContent(null);
+    } else {
+      setExpandedItem(verseKey);
+      setExpandedContent(null);
+      setIsExpandingLoading(true);
+      fetch(`/api/ayah?verseKey=${verseKey}`)
+        .then(r => r.json())
+        .then(data => {
+          setExpandedContent(data);
+          setIsExpandingLoading(false);
+        })
+        .catch(() => {
+          setIsExpandingLoading(false);
+        });
+    }
   };
 
   const urgentItems = pendingItems.filter(i => i.priority === 'urgent');
@@ -131,8 +151,30 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
                       className="overflow-hidden"
                     >
                       <div className="pt-3 pl-4">
-                        <div className="bg-zinc-800/50 rounded p-3 mb-2 font-arabic text-right text-lg text-zinc-200">
-                          بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ {item.ayah.verseKey.split(':')[1]}
+                        <div className="bg-zinc-800/50 rounded p-4 mb-3 font-arabic text-right text-zinc-200 min-h-[80px] flex flex-col justify-center border border-zinc-700/50">
+                          {isExpandingLoading ? (
+                            <div className="w-full">
+                              <div className="animate-pulse bg-zinc-700/50 rounded h-5 w-full mb-2"></div>
+                              <div className="animate-pulse bg-zinc-700/50 rounded h-5 w-3/4 ml-auto"></div>
+                            </div>
+                          ) : expandedContent ? (
+                            <>
+                              <p 
+                                dir="rtl" 
+                                className="text-xl leading-loose"
+                                style={{ fontFamily: "'Amiri Quran', 'me_quran', serif" }}
+                              >
+                                {expandedContent.arabicText}
+                              </p>
+                              {expandedContent.translationText && (
+                                <p className="text-xs text-zinc-400 leading-relaxed mt-3 text-left">
+                                  {expandedContent.translationText}
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <p className="text-lg">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ {item.ayah.verseKey.split(':')[1]}</p>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           <Button 

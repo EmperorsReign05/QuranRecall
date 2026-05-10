@@ -7,6 +7,7 @@ import { X, Check, Loader2, AlertTriangle, BookOpen, Calendar, Star, RefreshCcw 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useAyahContent } from "@/hooks/useAyahContent";
 import type { DecayedAyah, DifficultyRating, VerseKey } from "@/types/hifdh";
 
 export interface AyahDetailPanelProps {
@@ -29,6 +30,7 @@ export function AyahDetailPanel({
   similarVerseKeys = [],
 }: AyahDetailPanelProps) {
   const [reviseState, setReviseState] = useState<"idle" | "loading" | "success">("idle");
+  const { content, isLoading: arabicLoading } = useAyahContent(ayah?.verseKey ?? null);
 
   // Handle escape key
   useEffect(() => {
@@ -116,10 +118,31 @@ export function AyahDetailPanel({
             </div>
           )}
 
-          {/* Arabic Placeholder */}
-          <div className="text-center py-10 px-6 bg-accent/30 rounded-xl border-2 border-dashed border-accent font-arabic text-3xl text-foreground/80 leading-relaxed shadow-inner">
-            {/* Real arabic text would go here */}
-            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ {ayah.verseKey.split(':')[1]}
+          {/* Arabic Text */}
+          <div className="text-center py-10 px-6 bg-accent/30 rounded-xl border-2 border-dashed border-accent shadow-inner min-h-[140px] flex flex-col justify-center">
+            {arabicLoading ? (
+              <div className="w-full">
+                <div className="animate-pulse bg-zinc-700/50 rounded h-6 w-full mb-3"></div>
+                <div className="animate-pulse bg-zinc-700/50 rounded h-6 w-3/4 ml-auto"></div>
+              </div>
+            ) : content ? (
+              <>
+                <p 
+                  dir="rtl"
+                  className="text-right text-2xl leading-loose text-zinc-100 font-arabic"
+                  style={{ fontFamily: "'Amiri Quran', 'me_quran', serif" }}
+                >
+                  {content.arabicText}
+                </p>
+                {content.translationText && (
+                  <p className="text-xs text-zinc-400 leading-relaxed mt-4 text-left">
+                    {content.translationText}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-muted-foreground font-arabic text-xl">{ayah.verseKey}</p>
+            )}
           </div>
 
           {/* Stats Row */}
