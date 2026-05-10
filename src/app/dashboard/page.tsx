@@ -5,18 +5,19 @@ import { AnimatePresence } from "framer-motion";
 
 import { AyahHeatmap } from "@/components/dashboard/ayah-heatmap";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { RevisionQueuePlaceholder } from "@/components/dashboard/revision-queue-placeholder";
 import { StatCards } from "@/components/dashboard/stat-cards";
 import { AyahDetailPanel } from "@/components/dashboard/ayah-detail-panel";
+import { RevisionQueue } from "@/components/queue/RevisionQueue";
 import { useHifdh } from "@/hooks/useHifdh";
 import type { VerseKey } from "@/types/hifdh";
 
 export default function DashboardPage() {
-  const { surahGroups, stats, isLoading, markRevised, setDifficulty } = useHifdh();
+  const { surahGroups, stats, isLoading, markRevised, setDifficulty, revisionQueue } = useHifdh();
   const [selectedAyahKey, setSelectedAyahKey] = useState<VerseKey | null>(null);
 
   // Temporarily log to verify data flows
-  console.log(surahGroups);
+  console.log('surah groups:', surahGroups.length);
+  console.log('revision queue:', revisionQueue);
 
   // Find the selected ayah and its surah details
   let selectedAyah = null;
@@ -39,7 +40,7 @@ export default function DashboardPage() {
     <div className="space-y-8 relative overflow-hidden">
       <DashboardHeader />
       <StatCards />
-      <div className="grid gap-5 xl:grid-cols-[1.3fr_0.7fr]">
+      <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
         <AyahHeatmap
           surahGroups={surahGroups}
           stats={stats}
@@ -47,7 +48,15 @@ export default function DashboardPage() {
           onSelectAyah={setSelectedAyahKey}
           selectedAyah={selectedAyahKey}
         />
-        <RevisionQueuePlaceholder />
+        <div className="h-[600px] xl:h-auto">
+          <RevisionQueue 
+            items={revisionQueue} 
+            onMarkRevised={markRevised}
+            onAyahClick={(ayah) => {
+              setSelectedAyahKey(ayah.verseKey);
+            }}
+          />
+        </div>
       </div>
 
       <AnimatePresence>

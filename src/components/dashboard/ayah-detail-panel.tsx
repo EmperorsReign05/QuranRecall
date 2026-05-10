@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Check, Loader2, AlertTriangle, BookOpen, Calendar, Star, RefreshCcw } from "lucide-react";

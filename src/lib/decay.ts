@@ -138,10 +138,45 @@ export function buildRevisionQueue(
 ): RevisionQueueItem[] {
   const eligible = ayahs
     .filter((ayah) => ayah.memoryState !== "untracked")
-    .sort((left, right) => right.revisionUrgency - left.revisionUrgency)
-    .slice(0, limit);
+    .sort((left, right) => right.revisionUrgency - left.revisionUrgency);
 
-  return eligible.map((ayah) => ({
+  const selected: DecayedAyah[] = [];
+  const surahCounts = new Map<number, number>();
+
+  // Pass 1: max 2 ayahs per surah
+  for (const ayah of eligible) {
+    if (selected.length >= limit) break;
+    const count = surahCounts.get(ayah.surahNumber) ?? 0;
+    if (count < 2) {
+      selected.push(ayah);
+      surahCounts.set(ayah.surahNumber, count + 1);
+    }
+  }
+
+  // Pass 2: if limit not reached, allow up to 3 per surah
+  if (selected.length < limit) {
+    for (const ayah of eligible) {
+      if (selected.length >= limit) break;
+      if (selected.includes(ayah)) continue;
+      const count = surahCounts.get(ayah.surahNumber) ?? 0;
+      if (count < 3) {
+        selected.push(ayah);
+        surahCounts.set(ayah.surahNumber, count + 1);
+      }
+    }
+  }
+
+  // Pass 3: fallback to fill remaining slots regardless of surah
+  if (selected.length < limit) {
+    for (const ayah of eligible) {
+      if (selected.length >= limit) break;
+      if (!selected.includes(ayah)) {
+        selected.push(ayah);
+      }
+    }
+  }
+
+  return selected.map((ayah) => ({
     ayah,
     surahName: surahNames.get(ayah.surahNumber) ?? `Surah ${ayah.surahNumber}`,
     estimatedSeconds:
@@ -149,7 +184,7 @@ export function buildRevisionQueue(
     priority:
       ayah.strengthScore < 0.3
         ? "urgent"
-        : ayah.strengthScore < 0.55
+        : ayah.strengthScore < 0.65
           ? "due"
           : "upcoming",
   }));

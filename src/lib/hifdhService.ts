@@ -32,6 +32,9 @@ class HifdhService {
     const engagements = engagementStore.getAll();
     const decayedAyahs = applyDecay(engagements);
 
+    console.log('decayed ayahs sample:', decayedAyahs.slice(0,3));
+    console.log('non-untracked count:', decayedAyahs.filter(a => a.memoryState !== 'untracked').length);
+
     return {
       surahGroups: groupBySurah(decayedAyahs, SURAH_META),
       stats: calculateHifdhStats(decayedAyahs),
