@@ -25,12 +25,36 @@ function createSurahNameMap(): Map<number, string> {
 
 class HifdhService {
   init(): void {
-    engagementStore.seedIfEmpty(MOCK_ENGAGEMENTS);
+    // Removed automatic mock seeding for real users
   }
 
   getDashboardData(): DashboardData {
     const engagements = engagementStore.getAll();
-    const decayedAyahs = applyDecay(engagements);
+    let decayedAyahs = applyDecay(engagements);
+
+    if (typeof window !== "undefined") {
+      const target = localStorage.getItem("hifdh_onboarding_target");
+      if (engagements.length === 0 && target) {
+        const surahNum = Number(target);
+        const surah = SURAH_META_MAP.get(surahNum);
+        if (surah) {
+          const untrackedAyahs: DecayedAyah[] = Array.from({ length: surah.versesCount }).map((_, i) => ({
+            verseKey: `${surah.number}:${i + 1}` as VerseKey,
+            surahNumber: surah.number,
+            ayahNumber: i + 1,
+            engagementCount: 0,
+            daysSinceEngagement: null,
+            difficultyRating: 1,
+            strengthScore: 0,
+            memoryState: "untracked",
+            revisionUrgency: 0,
+            lastEngagedAt: null,
+            lastRevisedAt: null
+          }));
+          decayedAyahs = [...decayedAyahs, ...untrackedAyahs];
+        }
+      }
+    }
 
     console.log('decayed ayahs sample:', decayedAyahs.slice(0,3));
     console.log('non-untracked count:', decayedAyahs.filter(a => a.memoryState !== 'untracked').length);

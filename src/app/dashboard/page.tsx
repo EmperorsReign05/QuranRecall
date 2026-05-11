@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 
 import { AyahHeatmap } from "@/components/dashboard/ayah-heatmap";
@@ -8,12 +8,28 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { StatCards } from "@/components/dashboard/stat-cards";
 import { AyahDetailPanel } from "@/components/dashboard/ayah-detail-panel";
 import { RevisionQueue } from "@/components/queue/RevisionQueue";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { useHifdh } from "@/hooks/useHifdh";
 import type { VerseKey } from "@/types/hifdh";
 
 export default function DashboardPage() {
-  const { surahGroups, stats, isLoading, markRevised, setDifficulty, revisionQueue } = useHifdh();
+  const { surahGroups, stats, isLoading, markRevised, setDifficulty, revisionQueue, refreshData } = useHifdh();
   const [selectedAyahKey, setSelectedAyahKey] = useState<VerseKey | null>(null);
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (!localStorage.getItem("hifdh_onboarded")) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    refreshData();
+  };
 
   // Temporarily log to verify data flows
   console.log('surah groups:', surahGroups.length);
@@ -36,10 +52,20 @@ export default function DashboardPage() {
     }
   }
 
+  if (!isClient) return null;
+
+  const isTrulyNewUser = stats && stats.strongCount + stats.reviewCount + stats.weakCount === 0;
+
   return (
     <div className="space-y-8 relative overflow-hidden">
+      {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
       <DashboardHeader />
       <StatCards />
+      {isTrulyNewUser && !showOnboarding && (
+        <div className="bg-zinc-800/50 border border-zinc-700/50 p-4 rounded-xl text-sm text-zinc-300">
+          Gray squares are ayahs you haven&apos;t memorized yet. They&apos;ll turn green as you track your progress.
+        </div>
+      )}
       <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
         <AyahHeatmap
           surahGroups={surahGroups}

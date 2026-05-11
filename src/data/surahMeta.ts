@@ -120,3 +120,14 @@ export const SURAH_META: SurahMeta[] = [
 export const SURAH_META_MAP = new Map<number, SurahMeta>(
   SURAH_META.map((surah) => [surah.number, surah]),
 );
+
+export const BEGINNER_SURAHS: SurahMeta[] = [
+  SURAH_META[111], // Al-Ikhlas (112)
+  SURAH_META[112], // Al-Falaq (113)
+  SURAH_META[113], // An-Nas (114)
+  SURAH_META[107], // Al-Kawthar (108)
+  SURAH_META[102], // Al-Asr (103)
+  SURAH_META[0],   // Al-Fatihah (1)
+];
+
+export const JUZ_AMMA_SURAHS: SurahMeta[] = SURAH_META.slice(77, 114);

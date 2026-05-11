@@ -18,6 +18,7 @@ type UseHifdhResult = {
   isLoading: boolean;
   markRevised: (verseKey: VerseKey) => void;
   setDifficulty: (verseKey: VerseKey, rating: DifficultyRating) => void;
+  refreshData: () => void;
 };
 
 function emptyDashboard(): DashboardData {
@@ -38,9 +39,12 @@ export function useHifdh(): UseHifdhResult {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    hifdhService.init();
+  const refreshData = () => {
     setData(hifdhService.getDashboardData());
+  };
+
+  useEffect(() => {
+    refreshData();
     setIsLoading(false);
   }, []);
 
@@ -61,5 +65,6 @@ export function useHifdh(): UseHifdhResult {
     isLoading,
     markRevised,
     setDifficulty,
+    refreshData,
   };
 }
