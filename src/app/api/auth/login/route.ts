@@ -25,6 +25,7 @@ export async function GET() {
   authUrl.searchParams.set('nonce', nonce);
   authUrl.searchParams.set('code_challenge', codeChallenge);
   authUrl.searchParams.set('code_challenge_method', 'S256');
+  authUrl.searchParams.set('prompt', 'login'); // Force the provider to show the login screen
 
   return NextResponse.redirect(authUrl.toString());
 }
