@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X, Check, Loader2, AlertTriangle, BookOpen, Calendar, Star, RefreshCcw } from "lucide-react";
 
@@ -30,6 +31,7 @@ export function AyahDetailPanel({
   similarVerseKeys = [],
 }: AyahDetailPanelProps) {
   const [reviseState, setReviseState] = useState<"idle" | "loading" | "success">("idle");
+  const router = useRouter();
   const { content, isLoading: arabicLoading } = useAyahContent(ayah?.verseKey ?? null);
 
   // Handle escape key
@@ -181,22 +183,28 @@ export function AyahDetailPanel({
 
           {/* Controls */}
           <div className="space-y-4 mt-2">
-            <Button 
-              size="lg"
-              className={`w-full transition-all duration-300 ${
-                reviseState === "success" ? "bg-emerald-500 hover:bg-emerald-600 text-white" : ""
-              }`}
-              onClick={handleMarkRevised}
-              disabled={reviseState !== "idle"}
-            >
-              {reviseState === "idle" && "Mark as Revised"}
-              {reviseState === "loading" && <Loader2 className="w-5 h-5 animate-spin" />}
-              {reviseState === "success" && (
-                <>
-                  <Check className="w-5 h-5 mr-2" /> Recorded
-                </>
-              )}
-            </Button>
+            {ayah.memoryState === "untracked" ? (
+              <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white" onClick={() => router.push(`/memorize/${ayah.verseKey}`)}>
+                Start memorizing this ayah →
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                className={`w-full transition-all duration-300 ${
+                  reviseState === "success" ? "bg-emerald-500 hover:bg-emerald-600 text-white" : ""
+                }`}
+                onClick={handleMarkRevised}
+                disabled={reviseState !== "idle"}
+              >
+                {reviseState === "idle" && "Mark as Revised"}
+                {reviseState === "loading" && <Loader2 className="w-5 h-5 animate-spin" />}
+                {reviseState === "success" && (
+                  <>
+                    <Check className="w-5 h-5 mr-2" /> Recorded
+                  </>
+                )}
+              </Button>
+            )}
 
             <div className="bg-muted/40 p-1 rounded-lg flex border">
               {([1, 2, 3] as DifficultyRating[]).map((rating) => (

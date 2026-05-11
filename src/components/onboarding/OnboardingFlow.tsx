@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sprout, BookOpen, Shield, ChevronRight, Check } from "lucide-react";
 
@@ -29,6 +30,7 @@ const TIME_OPTIONS: { label: string; value: TimeAgo }[] = [
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [step, setStep] = useState(1);
   const [intent, setIntent] = useState<Intent>(null);
+  const router = useRouter();
 
   // Step 2 State
   const [selectedStartSurah, setSelectedStartSurah] = useState<number | null>(null);
@@ -90,15 +92,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     const keys = getVerseKeysToDeclare();
     
     if (keys.length > 0) {
-      // For "start", we shouldn't set a revision date because they haven't memorized it yet
       if (intent === "start") {
-        // We actually just mark them as tracked (untracked = false) with no prior review
-        // In engagementStore, declareMemorized sets lastEngagedAt. 
-        // For a true beginner, we might want them strictly untracked until they click.
-        // Wait, the prompt says: "Card A: Your first ayahs are ready. Tap any square as you memorize each one to mark your progress."
-        // We can just not declare anything for "start", so they remain untracked (gray squares).
-        // But we want ONLY their selected surah to show in the heatmap for them.
-        // We will store their preferred surah in local storage.
         localStorage.setItem("hifdh_onboarding_target", String(selectedStartSurah));
       } else {
         engagementStore.declareMemorized(keys, lastRevised, 1);
@@ -106,7 +100,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
     
     localStorage.setItem("hifdh_onboarded", "true");
-    onComplete();
+    
+    if (intent === "start" && selectedStartSurah) {
+      router.push(`/memorize/surah/${selectedStartSurah}`);
+      onComplete(); // Still call onComplete to close the modal state in dashboard
+    } else {
+      onComplete();
+    }
   };
 
   const renderStep1 = () => (
