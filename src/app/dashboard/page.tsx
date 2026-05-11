@@ -10,10 +10,13 @@ import { AyahDetailPanel } from "@/components/dashboard/ayah-detail-panel";
 import { RevisionQueue } from "@/components/queue/RevisionQueue";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { useHifdh } from "@/hooks/useHifdh";
+import { useAuth } from "@/hooks/useAuth";
 import type { VerseKey } from "@/types/hifdh";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
   const { surahGroups, stats, isLoading, markRevised, setDifficulty, revisionQueue, refreshData } = useHifdh();
+  const { isAuthenticated, isLoading: isAuthLoading, login } = useAuth();
   const [selectedAyahKey, setSelectedAyahKey] = useState<VerseKey | null>(null);
 
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -58,6 +61,14 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 relative overflow-hidden">
+      {!isAuthenticated && !isAuthLoading && (
+        <div className="bg-zinc-800/80 border border-emerald-500/20 p-4 rounded-xl text-sm flex items-center justify-between shadow-lg">
+          <p className="text-zinc-300">Sign in with your Quran.com account to sync your progress across devices.</p>
+          <Button size="sm" onClick={login} className="bg-emerald-500 hover:bg-emerald-600 text-white ml-4">
+            Sign in
+          </Button>
+        </div>
+      )}
       {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
       <DashboardHeader />
       <StatCards />

@@ -1,8 +1,8 @@
 import SurahSession from '@/components/memorization/SurahSession';
 import { notFound } from 'next/navigation';
 
-export default function MemorizeSurahPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function MemorizeSurahPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const surahId = parseInt(id);
 
   if (isNaN(surahId)) {

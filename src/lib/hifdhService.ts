@@ -66,8 +66,21 @@ class HifdhService {
     };
   }
 
+  async recordReadingSession(verseKey: VerseKey): Promise<void> {
+    try {
+      await fetch('/api/user/reading-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verseKey }),
+      });
+    } catch (e) {
+      console.error('Failed to record reading session (fire and forget)', e);
+    }
+  }
+
   markRevised(verseKey: VerseKey): DashboardData {
     engagementStore.markRevised(verseKey);
+    this.recordReadingSession(verseKey).catch(() => {});
     return this.getDashboardData();
   }
 

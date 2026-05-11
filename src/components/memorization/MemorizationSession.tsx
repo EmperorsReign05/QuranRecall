@@ -1,7 +1,9 @@
+"use client";
+
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useAyahContent } from '@/hooks/useAyahContent';
 import { engagementStore } from '@/lib/engagementStore';
 import { useRouter } from 'next/navigation';
@@ -192,7 +194,7 @@ export default function MemorizationSession({ verseKey, surahName, onComplete }:
         {phase === 'completed' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
             <h3 className="text-xl font-semibold mb-2">Well done.</h3>
-            <p className="mb-2">You've completed {surahName ?? ''} {verseKey}</p>
+            <p className="mb-2">You&apos;ve completed {surahName ?? ''} {verseKey}</p>
             <p className="mb-4">
               {fullMistake || (mistakeZones.beginning + mistakeZones.middle + mistakeZones.end) >= 3
                 ? 'Marked as Hard'
