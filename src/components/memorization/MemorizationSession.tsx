@@ -160,7 +160,7 @@ export default function MemorizationSession({ verseKey, surahName, onComplete }:
             >
               {showChunks ? chunks[chunkIndex] ?? '' : arabicText}
             </div>
-            <p className="text-sm text-zinc-400 mt-3 text-center">{translationText}</p>
+            <p className="text-sm text-zinc-400 mt-3 text-center" dangerouslySetInnerHTML={{ __html: translationText }} />
           </>
         )}
         {showChunks && (

@@ -167,9 +167,10 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
                                 {expandedContent.arabicText}
                               </p>
                               {expandedContent.translationText && (
-                                <p className="text-xs text-zinc-400 leading-relaxed mt-3 text-left">
-                                  {expandedContent.translationText}
-                                </p>
+                                <p 
+                                  className="text-xs text-zinc-400 leading-relaxed mt-3 text-left"
+                                  dangerouslySetInnerHTML={{ __html: expandedContent.translationText }}
+                                />
                               )}
                             </>
                           ) : (

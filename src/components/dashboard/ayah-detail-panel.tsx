@@ -137,9 +137,10 @@ export function AyahDetailPanel({
                   {content.arabicText}
                 </p>
                 {content.translationText && (
-                  <p className="text-xs text-zinc-400 leading-relaxed mt-4 text-left">
-                    {content.translationText}
-                  </p>
+                  <p 
+                    className="text-xs text-zinc-400 leading-relaxed mt-4 text-left"
+                    dangerouslySetInnerHTML={{ __html: content.translationText }}
+                  />
                 )}
               </>
             ) : (
