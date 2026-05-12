@@ -27,7 +27,6 @@ export default function DashboardPage() {
   useEffect(() => {
     setIsClient(true);
     
-    // Auth Guard
     if (!isAuthLoading && !isAuthenticated) {
       if (sessionStorage.getItem("dev_guest") !== "true") {
         router.push("/");
@@ -45,11 +44,9 @@ export default function DashboardPage() {
     refreshData();
   };
 
-  // Temporarily log to verify data flows
   console.log('surah groups:', surahGroups.length);
   console.log('revision queue:', revisionQueue);
 
-  // Find the selected ayah and its surah details
   let selectedAyah = null;
   let surahName = "";
   let translatedName = "";

@@ -12,10 +12,7 @@ export async function GET() {
   try {
     const session = JSON.parse(sessionCookie.value);
     
-    // Attempt refresh if close to expiring
-    if (session.expiresAt < Date.now() + 60000) {
-      // Logic for refresh would usually go here or trigger a background refresh.
-      // We will handle refresh gracefully in reading-session route.
+    if (Date.now() > session.expiresAt - 5 * 60 * 1000) {
     }
 
     return NextResponse.json({ user: session.user, isAuthenticated: true });

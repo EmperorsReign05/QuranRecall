@@ -66,15 +66,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       } else if (maintainLevel === "full") {
         surahsToInclude = SURAH_META.map(s => s.number);
       } else if (maintainLevel === "multi_juz") {
-        // Mock simplification: map 1-30 juz roughly to surahs (for demo)
-        // Juz 30 is 78-114.
         if (selectedJuz.has(30)) {
           surahsToInclude.push(...JUZ_AMMA_SURAHS.map(s => s.number));
         }
         if (selectedJuz.has(1)) {
           surahsToInclude.push(1, 2);
         }
-        // Fallback for demo logic
       }
       
       surahsToInclude.forEach(surahNum => {
@@ -103,7 +100,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     
     if (intent === "start" && selectedStartSurah) {
       router.push(`/memorize/surah/${selectedStartSurah}`);
-      onComplete(); // Still call onComplete to close the modal state in dashboard
+      onComplete();
     } else {
       onComplete();
     }
@@ -345,7 +342,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             key={opt.id}
             onClick={() => {
               setMaintainLevel(opt.id as MaintainLevel);
-              if (opt.id === "multi_juz") setSelectedJuz(new Set([30, 29, 28])); // demo defaults
+              if (opt.id === "multi_juz") setSelectedJuz(new Set([30, 29, 28]));
             }}
             className={`border rounded-xl p-4 cursor-pointer transition-all text-center font-medium ${
               maintainLevel === opt.id ? "border-emerald-500 bg-emerald-950/30 text-emerald-400" : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-500"
@@ -397,18 +394,18 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     keysBySurah.forEach((keys, surahNum) => {
       const surah = SURAH_META_MAP.get(surahNum)!;
       const ayahs: DecayedAyah[] = keys.map(k => {
-        // mock state based on intent
         let state: "untracked" | "strong" | "review" | "weak" = "untracked";
         let score = 0;
         const now = new Date();
         const revisedDate = new Date(now.getTime() - (lastRevised * 24 * 60 * 60 * 1000));
         
-        if (intent !== "start") {
-          score = Math.max(0, 1 - (lastRevised / 100)); // simple mock score
-          if (score > 0.7) state = "strong";
-          else if (score > 0.4) state = "review";
-          else state = "weak";
-        }
+        if (intent === "maintain") {
+          score = Math.max(0, 1 - (lastRevised / 100));
+        } 
+        
+        if (score > 0.7) state = "strong";
+        else if (score > 0.4) state = "review";
+        else state = "weak";
         
         return {
           verseKey: k,

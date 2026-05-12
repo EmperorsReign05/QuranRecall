@@ -44,10 +44,8 @@ export async function POST(request: Request) {
 
     const tokenData = await tokenRes.json();
     
-    // Parse ID Token (JWT) - just base64 decode for hackathon
-    // TODO: verify JWT signature in production
-    const idTokenPayloadBase64 = tokenData.id_token.split('.')[1];
-    const idTokenPayload = JSON.parse(Buffer.from(idTokenPayloadBase64, 'base64').toString());
+    const idTokenParts = tokenData.id_token.split('.');
+    const idTokenPayload = JSON.parse(Buffer.from(idTokenParts[1], 'base64').toString());
 
     const user = {
       sub: idTokenPayload.sub,

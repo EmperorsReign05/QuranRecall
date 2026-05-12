@@ -38,7 +38,6 @@ export default function MemorizationSession({ verseKey, surahName, onComplete }:
 
   useEffect(() => {
     localStorage.setItem('hifdh_method', method);
-    // Reset counter when method changes (only if in reading phase)
     if (phase === 'reading') {
       setCounter(method === 'Standard' ? 10 : method === 'Singapore' ? 5 : 3);
     }
@@ -51,7 +50,6 @@ export default function MemorizationSession({ verseKey, surahName, onComplete }:
   });
   const [fullMistake, setFullMistake] = useState(false);
 
-  // Split Arabic text into chunks (5‑7 words) when needed
   const chunks = showChunks && arabicText
     ? arabicText.split(' ').reduce<string[]>((acc: string[], word: string) => {
         if (!acc.length) acc.push(word);
@@ -67,13 +65,11 @@ export default function MemorizationSession({ verseKey, surahName, onComplete }:
   const handleReadingDone = () => {
     if (counter > 1) setCounter(counter - 1);
     else {
-      // move to memory phase for methods that have it
       if (method === 'Standard' || method === 'Quick') {
         const memCount = method === 'Standard' ? 5 : 2;
         setCounter(memCount);
         setPhase('memory');
       } else {
-        // Singapore alternates automatically; for simplicity just complete
         setPhase('completed');
       }
     }
@@ -85,12 +81,11 @@ export default function MemorizationSession({ verseKey, surahName, onComplete }:
   };
 
   const finalize = () => {
-    // Determine difficulty rating from mistakes
     let rating: DifficultyRating = 1;
     const totalHesitations = mistakeZones.beginning + mistakeZones.middle + mistakeZones.end;
     if (fullMistake || totalHesitations >= 3) rating = 3;
     else if (totalHesitations >= 1) rating = 2;
-    // Record in store
+    
     engagementStore.markRevised(verseKey);
     engagementStore.setDifficulty(verseKey, rating);
     if (onComplete) onComplete();

@@ -30,7 +30,6 @@ export async function POST(request: Request) {
     let response = await doRequest(session.accessToken);
 
     if (response.status === 401) {
-      // Attempt token refresh
       const refreshRes = await fetch(new URL('/api/auth/refresh', request.url), {
         method: 'POST',
         headers: { cookie: request.headers.get('cookie') || '' },
@@ -50,7 +49,6 @@ export async function POST(request: Request) {
       const errText = await response.text();
       console.error('Failed to create reading session:', response.status, errText);
       
-      // Fallback path just in case /auth/v1/reading-sessions fails
       if (response.status === 404) {
         const fallbackUrl = `${process.env.NEXT_PUBLIC_QURAN_API_BASE}/v1/reading-sessions`;
         response = await fetch(fallbackUrl, {
