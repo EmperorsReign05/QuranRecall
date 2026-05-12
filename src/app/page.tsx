@@ -8,7 +8,7 @@ import Link from "next/link";
 
 import { MotionSection } from "@/components/motion-section";
 import { TopNavbar } from "@/components/navigation/top-navbar";
-import { Button } from "@/components/ui/button";
+import { LandingButtons } from "@/components/landing-buttons";
 import { Card, CardContent } from "@/components/ui/card";
 import { mockStats } from "@/lib/mock-data";
 
@@ -50,17 +50,7 @@ export default function LandingPage() {
               Track ayah strength, revision pressure, and learning consistency
               without adding noise to your daily Quran routine.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg">
-                <Link href="/dashboard">
-                  Open dashboard
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild variant="secondary" size="lg">
-                <Link href="#overview">View structure</Link>
-              </Button>
-            </div>
+            <LandingButtons />
           </MotionSection>
 
           <MotionSection

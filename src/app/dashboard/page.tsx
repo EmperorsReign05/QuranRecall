@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 import { AyahHeatmap } from "@/components/dashboard/ayah-heatmap";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -16,18 +17,28 @@ import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
   const { surahGroups, stats, isLoading, markRevised, setDifficulty, revisionQueue, refreshData } = useHifdh();
-  const { isAuthenticated, isLoading: isAuthLoading, login } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [selectedAyahKey, setSelectedAyahKey] = useState<VerseKey | null>(null);
+  const router = useRouter();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    
+    // Auth Guard
+    if (!isAuthLoading && !isAuthenticated) {
+      if (sessionStorage.getItem("dev_guest") !== "true") {
+        router.push("/");
+        return;
+      }
+    }
+
     if (!localStorage.getItem("hifdh_onboarded")) {
       setShowOnboarding(true);
     }
-  }, []);
+  }, [isAuthenticated, isAuthLoading, router]);
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
@@ -61,14 +72,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 relative overflow-hidden">
-      {!isAuthenticated && !isAuthLoading && (
-        <div className="bg-zinc-800/80 border border-emerald-500/20 p-4 rounded-xl text-sm flex items-center justify-between shadow-lg">
-          <p className="text-zinc-300">Sign in with your Quran.com account to sync your progress across devices.</p>
-          <Button size="sm" onClick={login} className="bg-emerald-500 hover:bg-emerald-600 text-white ml-4">
-            Sign in
-          </Button>
-        </div>
-      )}
       {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
       <DashboardHeader />
       <StatCards />
