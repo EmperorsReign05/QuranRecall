@@ -16,9 +16,9 @@ export async function GET() {
     maxAge: 600,
   });
 
-  const authUrl = new URL(process.env.QURAN_AUTH_URL + '/oauth2/auth');
+  const authUrl = new URL(process.env.QURAN_USER_AUTH_URL + '/oauth2/auth');
   authUrl.searchParams.set('response_type', 'code');
-  authUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_QURAN_CLIENT_ID!);
+  authUrl.searchParams.set('client_id', process.env.QURAN_USER_CLIENT_ID!);
   authUrl.searchParams.set('redirect_uri', process.env.NEXT_PUBLIC_REDIRECT_URI!);
   authUrl.searchParams.set('scope', 'openid offline_access user');
   authUrl.searchParams.set('state', state);

@@ -1,22 +1,20 @@
+import { randomBytes } from 'crypto';
+
 export function generateRandomString(length = 16): string {
-  const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-  let array = new Uint8Array(length);
-  crypto.getRandomValues(array);
-  array = array.map(x => validChars.charCodeAt(x % validChars.length));
-  return String.fromCharCode.apply(null, Array.from(array));
+  return randomBytes(32).toString('base64url').substring(0, length);
 }
 
 export function generateCodeVerifier(): string {
-  // 43-128 chars, URL-safe random string
-  return generateRandomString(43);
+  // 32 bytes encoded in base64url is 43 characters, exactly meeting the 43-128 requirement
+  return randomBytes(32).toString('base64url');
 }
 
 export async function generateCodeChallenge(verifier: string): Promise<string> {
-  // SHA-256 hash of verifier
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
   const digest = await crypto.subtle.digest('SHA-256', data);
-  const base64Digest = btoa(String.fromCharCode(...new Uint8Array(digest)));
-  // Return base64url encoded (no padding, url-safe)
-  return base64Digest.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
 }

@@ -66,7 +66,7 @@ async function getAccessToken(): Promise<string> {
 
   const clientId = getRequiredEnv("NEXT_PUBLIC_QURAN_CLIENT_ID");
   const clientSecret = getRequiredEnv("QURAN_CLIENT_SECRET");
-  const authUrl = getRequiredEnv("QURAN_AUTH_URL");
+  const authUrl = getRequiredEnv("NEXT_PUBLIC_QURAN_AUTH_URL");
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
   const response = await fetch(`${authUrl}/oauth2/token`, {

@@ -11,12 +11,12 @@ export async function POST() {
 
   try {
     const session = JSON.parse(sessionCookie.value);
-    const clientId = process.env.NEXT_PUBLIC_QURAN_CLIENT_ID!;
-    const clientSecret = process.env.QURAN_CLIENT_SECRET!;
+    const clientId = process.env.QURAN_USER_CLIENT_ID!;
+    const clientSecret = process.env.QURAN_USER_CLIENT_SECRET!;
     
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
-    const tokenRes = await fetch(`${process.env.QURAN_AUTH_URL}/oauth2/token`, {
+    const tokenRes = await fetch(`${process.env.QURAN_USER_AUTH_URL}/oauth2/token`, {
       method: 'POST',
       headers: {
         Authorization: `Basic ${credentials}`,

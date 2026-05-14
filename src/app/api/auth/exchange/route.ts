@@ -17,13 +17,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'State mismatch' }, { status: 400 });
     }
 
-    const clientId = process.env.NEXT_PUBLIC_QURAN_CLIENT_ID!;
-    const clientSecret = process.env.QURAN_CLIENT_SECRET!;
+    const clientId = process.env.QURAN_USER_CLIENT_ID!;
+    const clientSecret = process.env.QURAN_USER_CLIENT_SECRET!;
     const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI!;
     
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const tokenUrl = `${process.env.QURAN_USER_AUTH_URL}/oauth2/token`;
+    
+    console.log('Exchanging code at:', tokenUrl);
+    console.log('Using client ID:', process.env.QURAN_USER_CLIENT_ID);
 
-    const tokenRes = await fetch(`${process.env.QURAN_AUTH_URL}/oauth2/token`, {
+    const tokenRes = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         Authorization: `Basic ${credentials}`,

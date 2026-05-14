@@ -14,13 +14,13 @@ export async function POST(request: Request) {
     const { verseKey } = await request.json();
 
     const doRequest = async (accessToken: string) => {
-      const url = `${process.env.NEXT_PUBLIC_QURAN_API_BASE}/auth/v1/reading-sessions`;
+      const url = `${process.env.QURAN_USER_API_BASE}/auth/v1/reading-sessions`;
       
       return fetch(url, {
         method: 'POST',
         headers: {
           'x-auth-token': accessToken,
-          'x-client-id': process.env.NEXT_PUBLIC_QURAN_CLIENT_ID!,
+          'x-client-id': process.env.QURAN_USER_CLIENT_ID!,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ verse_key: verseKey }),
@@ -50,18 +50,20 @@ export async function POST(request: Request) {
       console.error('Failed to create reading session:', response.status, errText);
       
       if (response.status === 404) {
-        const fallbackUrl = `${process.env.NEXT_PUBLIC_QURAN_API_BASE}/v1/reading-sessions`;
+        const fallbackUrl = `${process.env.QURAN_USER_API_BASE}/content/api/v4/reading-sessions`;
         response = await fetch(fallbackUrl, {
           method: 'POST',
           headers: {
             'x-auth-token': session.accessToken,
-            'x-client-id': process.env.NEXT_PUBLIC_QURAN_CLIENT_ID!,
+            'x-client-id': process.env.QURAN_USER_CLIENT_ID!,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ verse_key: verseKey }),
         });
         
         if (!response.ok) {
+          const fallbackText = await response.text();
+          console.log('Reading session response:', response.status, fallbackText);
           return NextResponse.json({ error: 'Failed to record session' }, { status: response.status });
         }
       } else {
@@ -69,7 +71,14 @@ export async function POST(request: Request) {
       }
     }
 
-    const data = await response.json();
+    const textData = await response.text();
+    console.log('Reading session response:', response.status, textData);
+    let data;
+    try {
+      data = JSON.parse(textData);
+    } catch {
+      data = { message: textData };
+    }
     return NextResponse.json(data);
   } catch (error) {
     console.error('Reading session error:', error);
