@@ -20,7 +20,7 @@ export async function GET() {
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('client_id', process.env.QURAN_USER_CLIENT_ID!);
   authUrl.searchParams.set('redirect_uri', process.env.NEXT_PUBLIC_REDIRECT_URI!);
-  authUrl.searchParams.set('scope', 'openid offline_access user');
+  authUrl.searchParams.set('scope', 'openid offline_access user reading_session bookmark goal streak activity_day collection preference');
   authUrl.searchParams.set('state', state);
   authUrl.searchParams.set('nonce', nonce);
   authUrl.searchParams.set('code_challenge', codeChallenge);
