@@ -1,13 +1,43 @@
 import type { AyahEngagement, VerseKey } from "@/types/hifdh";
-import type { ReadingSession } from "@/lib/userApi";
+
+// API returns { chapterNumber, verseNumber } — no verse_key field
+type RawSession = {
+  id?: string;
+  chapterNumber?: number;
+  verseNumber?: number;
+  verse_key?: string;
+  verseKey?: string;
+  updatedAt?: string;
+  updated_at?: string;
+  createdAt?: string;
+  created_at?: string;
+};
+
+function getVerseKey(session: RawSession): string | null {
+  if (session.verse_key) return session.verse_key;
+  if (session.verseKey) return session.verseKey;
+  if (session.chapterNumber != null && session.verseNumber != null) {
+    return `${session.chapterNumber}:${session.verseNumber}`;
+  }
+  return null;
+}
+
+function getDate(session: RawSession): Date {
+  const raw = session.updatedAt ?? session.updated_at ?? session.createdAt ?? session.created_at;
+  return raw ? new Date(raw) : new Date();
+}
 
 export function mapSessionsToEngagements(
-  sessions: ReadingSession[]
+  sessions: RawSession[]
 ): AyahEngagement[] {
-  const grouped = new Map<string, ReadingSession[]>();
+  const grouped = new Map<string, RawSession[]>();
 
   for (const session of sessions) {
-    const key = session.verse_key;
+    const key = getVerseKey(session);
+    if (!key) {
+      console.warn("Session missing identifiers:", JSON.stringify(session));
+      continue;
+    }
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key)!.push(session);
   }
@@ -16,7 +46,7 @@ export function mapSessionsToEngagements(
 
   grouped.forEach((sessionList, verseKey) => {
     const sorted = [...sessionList].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      (a, b) => getDate(b).getTime() - getDate(a).getTime()
     );
 
     const [surahValue, ayahValue] = verseKey.split(":");
@@ -25,19 +55,18 @@ export function mapSessionsToEngagements(
 
     if (!Number.isFinite(surahNumber) || !Number.isFinite(ayahNumber)) return;
 
-    const lastDate = new Date(sorted[0].created_at);
-
     engagements.push({
       verseKey: verseKey as VerseKey,
       surahNumber,
       ayahNumber,
-      lastEngagedAt: lastDate,
-      lastRevisedAt: lastDate,
+      lastEngagedAt: getDate(sorted[0]),
+      lastRevisedAt: getDate(sorted[0]),
       engagementCount: sessionList.length,
       difficultyRating: 2,
     });
   });
 
+  console.log("Mapped engagements count:", engagements.length);
   return engagements;
 }
 
@@ -47,12 +76,10 @@ export function mergeWithLocalEngagements(
 ): AyahEngagement[] {
   const merged = new Map<string, AyahEngagement>();
 
-  // Seed with API engagements first (source of truth for dates + counts)
   for (const eng of apiEngagements) {
     merged.set(eng.verseKey, eng);
   }
 
-  // Merge local on top — preserve difficulty rating, combine counts
   for (const local of localEngagements) {
     const existing = merged.get(local.verseKey);
     if (existing) {

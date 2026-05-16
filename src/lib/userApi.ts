@@ -28,11 +28,11 @@ function getHeaders(accessToken: string): Record<string, string> {
 
 export async function getUserReadingSessions(
   accessToken: string,
-  limit = 50
+  limit = 20
 ): Promise<ReadingSession[]> {
   try {
     const res = await fetch(
-      `${process.env.QURAN_USER_API_BASE}/auth/v1/reading-sessions?per_page=${limit}`,
+      `${process.env.QURAN_USER_API_BASE}/auth/v1/reading-sessions?first=${Math.min(limit, 20)}`,
       { headers: getHeaders(accessToken), cache: "no-store" }
     );
     if (!res.ok) {
@@ -40,7 +40,11 @@ export async function getUserReadingSessions(
       return [];
     }
     const json = await res.json();
-    return (json.reading_sessions ?? json.data ?? []) as ReadingSession[];
+    console.log("Reading sessions response keys:", Object.keys(json));
+    const sessions = (json.reading_sessions ?? json.data ?? json.edges?.map((e: {node: ReadingSession}) => e.node) ?? []) as ReadingSession[];
+    console.log("Reading sessions count:", sessions.length);
+    if (sessions.length > 0) console.log("First session sample:", JSON.stringify(sessions[0]));
+    return sessions;
   } catch (e) {
     console.error("getUserReadingSessions error:", e);
     return [];
@@ -52,7 +56,7 @@ export async function getUserActivityDays(
 ): Promise<ActivityDay[]> {
   try {
     const res = await fetch(
-      `${process.env.QURAN_USER_API_BASE}/auth/v1/activity-days?per_page=30`,
+      `${process.env.QURAN_USER_API_BASE}/auth/v1/activity-days?first=30`,
       { headers: getHeaders(accessToken), cache: "no-store" }
     );
     if (!res.ok) {
@@ -60,7 +64,8 @@ export async function getUserActivityDays(
       return [];
     }
     const json = await res.json();
-    return (json.activity_days ?? json.data ?? []) as ActivityDay[];
+    console.log("Activity days response keys:", Object.keys(json));
+    return (json.activity_days ?? json.data ?? json.edges?.map((e: {node: ActivityDay}) => e.node) ?? []) as ActivityDay[];
   } catch (e) {
     console.error("getUserActivityDays error:", e);
     return [];
@@ -73,7 +78,7 @@ export async function getUserStreaks(
   const fallback: UserStreak = { current_streak: 0, longest_streak: 0 };
   try {
     const res = await fetch(
-      `${process.env.QURAN_USER_API_BASE}/auth/v1/streaks`,
+      `${process.env.QURAN_USER_API_BASE}/auth/v1/streaks?first=1`,
       { headers: getHeaders(accessToken), cache: "no-store" }
     );
     if (!res.ok) {
@@ -81,9 +86,14 @@ export async function getUserStreaks(
       return fallback;
     }
     const json = await res.json();
+    console.log("Streaks response:", JSON.stringify(json).substring(0, 300));
+    // API returns { data: [ { days, status, type, ... } ] }
+    const data: Array<{ days?: number; status?: string; current_streak?: number; longest_streak?: number }> = Array.isArray(json.data) ? json.data : [];
+    const activeStreak = data.find(s => s.status === 'ACTIVE') ?? data[0];
+    const allDays = data.map(s => s.days ?? 0);
     return {
-      current_streak: json.current_streak ?? json.streak?.current ?? 0,
-      longest_streak: json.longest_streak ?? json.streak?.max ?? 0,
+      current_streak: activeStreak?.days ?? activeStreak?.current_streak ?? 0,
+      longest_streak: Math.max(0, ...allDays, activeStreak?.longest_streak ?? 0),
     };
   } catch (e) {
     console.error("getUserStreaks error:", e);

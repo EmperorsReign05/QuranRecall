@@ -13,7 +13,7 @@ export function StatCards({ totalTracked = 0, currentStreak = 0, healthScore = 0
   const stats = [
     { label: "Current streak", value: `${currentStreak} days`, icon: Flame },
     { label: "Ayahs tracked", value: String(totalTracked), icon: CalendarCheck },
-    { label: "Health score", value: `${Math.round(healthScore * 100)}%`, icon: BookOpenCheck },
+    { label: "Health score", value: `${Math.round(healthScore)}%`, icon: BookOpenCheck },
   ];
 
   return (

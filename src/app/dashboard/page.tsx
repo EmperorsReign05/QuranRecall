@@ -45,6 +45,9 @@ export default function DashboardPage() {
       }
     }
 
+    // Wait for auth to resolve before checking onboarding
+    if (isAuthLoading) return;
+
     if (!localStorage.getItem("hifdh_onboarded")) {
       if (isAuthenticated) {
         fetch("/api/user/sessions")

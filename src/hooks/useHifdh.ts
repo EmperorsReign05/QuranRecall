@@ -14,7 +14,7 @@ import type {
   SurahGroup,
   VerseKey,
 } from "@/types/hifdh";
-import type { ReadingSession, UserStreak } from "@/lib/userApi";
+import type { UserStreak } from "@/lib/userApi";
 
 type DataSource = "api" | "local";
 
@@ -89,7 +89,7 @@ export function useHifdh(): UseHifdhResult {
           if (!sessionsRes.ok) throw new Error("sessions fetch failed");
 
           const { sessions, streaks: fetchedStreaks } = await sessionsRes.json() as {
-            sessions: ReadingSession[];
+            sessions: unknown[];
             streaks: UserStreak;
           };
 
@@ -98,7 +98,9 @@ export function useHifdh(): UseHifdhResult {
           if (fetchedStreaks) setStreaks(fetchedStreaks);
 
           if (sessions.length > 0) {
-            const apiEngagements = mapSessionsToEngagements(sessions);
+            const apiEngagements = mapSessionsToEngagements(
+              sessions as Parameters<typeof mapSessionsToEngagements>[0]
+            );
             const localEngagements = engagementStore.getAll();
             const merged = mergeWithLocalEngagements(apiEngagements, localEngagements);
             engagementStore.bulkWrite(merged);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, BookOpen, Sprout, LogIn, ChevronRight, Check } from "lucide-react";
@@ -31,6 +31,13 @@ export function OnboardingFlow({ onComplete, isAuthenticated, firstName, session
   const [step, setStep] = useState(isAuthenticated ? 2 : 1);
   const [intent, setIntent] = useState<Intent>(null);
   const router = useRouter();
+
+  // If auth resolves after initial render and we're still on the sign-in step, advance
+  useEffect(() => {
+    if (isAuthenticated && step === 1) {
+      setStep(2);
+    }
+  }, [isAuthenticated, step]);
 
   const [selectedStartSurah, setSelectedStartSurah] = useState<number | null>(null);
   const [selectedSomeSurahs, setSelectedSomeSurahs] = useState<Set<number>>(new Set());

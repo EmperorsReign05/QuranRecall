@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
     const clientId = process.env.QURAN_USER_CLIENT_ID!;
     const clientSecret = process.env.QURAN_USER_CLIENT_SECRET!;
-    const redirectUri = process.env.REDIRECT_URI!;
+    const redirectUri = process.env.REDIRECT_URI ?? process.env.NEXT_PUBLIC_REDIRECT_URI ?? 'http://localhost:3000/callback';
     
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     const tokenUrl = `${process.env.QURAN_USER_AUTH_URL}/oauth2/token`;
@@ -47,15 +47,25 @@ export async function POST(request: Request) {
     }
 
     const tokenData = await tokenRes.json();
-    
-    const idTokenParts = tokenData.id_token.split('.');
-    const idTokenPayload = JSON.parse(Buffer.from(idTokenParts[1], 'base64').toString());
+
+    let idTokenPayload: Record<string, string> = {};
+    if (tokenData.id_token) {
+      try {
+        const parts = tokenData.id_token.split('.');
+        idTokenPayload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+      } catch {
+        console.warn('Could not parse id_token payload');
+      }
+    }
+
+    console.log('Token data keys:', Object.keys(tokenData));
+    console.log('ID token payload:', idTokenPayload);
 
     const user = {
-      sub: idTokenPayload.sub,
-      email: idTokenPayload.email,
-      firstName: idTokenPayload.first_name,
-      lastName: idTokenPayload.last_name,
+      sub: idTokenPayload.sub ?? tokenData.sub ?? 'unknown',
+      email: idTokenPayload.email ?? '',
+      firstName: idTokenPayload.first_name ?? idTokenPayload.given_name ?? '',
+      lastName: idTokenPayload.last_name ?? idTokenPayload.family_name ?? '',
     };
 
     const sessionData = {
@@ -76,6 +86,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, user });
   } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Exchange route error:', error);
+    return NextResponse.json({ error: 'Internal Server Error', detail: String(error) }, { status: 500 });
   }
 }
