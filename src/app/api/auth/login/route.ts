@@ -19,7 +19,7 @@ export async function GET() {
   const authUrl = new URL(process.env.QURAN_USER_AUTH_URL + '/oauth2/auth');
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('client_id', process.env.QURAN_USER_CLIENT_ID!);
-  authUrl.searchParams.set('redirect_uri', process.env.NEXT_PUBLIC_REDIRECT_URI!);
+  authUrl.searchParams.set('redirect_uri', process.env.REDIRECT_URI!);
   authUrl.searchParams.set('scope', 'openid offline_access user reading_session bookmark goal streak activity_day collection preference');
   authUrl.searchParams.set('state', state);
   authUrl.searchParams.set('nonce', nonce);

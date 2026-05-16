@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
     const clientId = process.env.QURAN_USER_CLIENT_ID!;
     const clientSecret = process.env.QURAN_USER_CLIENT_SECRET!;
-    const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI!;
+    const redirectUri = process.env.REDIRECT_URI!;
     
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     const tokenUrl = `${process.env.QURAN_USER_AUTH_URL}/oauth2/token`;
