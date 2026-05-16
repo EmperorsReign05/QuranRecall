@@ -10,23 +10,34 @@ import { StatCards } from "@/components/dashboard/stat-cards";
 import { AyahDetailPanel } from "@/components/dashboard/ayah-detail-panel";
 import { RevisionQueue } from "@/components/queue/RevisionQueue";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { TrackSurahButton } from "@/components/dashboard/TrackSurahButton";
 import { useHifdh } from "@/hooks/useHifdh";
 import { useAuth } from "@/hooks/useAuth";
 import type { VerseKey } from "@/types/hifdh";
-import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
-  const { surahGroups, stats, isLoading, markRevised, setDifficulty, revisionQueue, refreshData } = useHifdh();
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const {
+    surahGroups,
+    stats,
+    isLoading,
+    markRevised,
+    setDifficulty,
+    revisionQueue,
+    refreshData,
+    currentStreak,
+    dataSource,
+  } = useHifdh();
+  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
   const [selectedAyahKey, setSelectedAyahKey] = useState<VerseKey | null>(null);
   const router = useRouter();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [sessionCount, setSessionCount] = useState(0);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-    
+
     if (!isAuthLoading && !isAuthenticated) {
       if (sessionStorage.getItem("dev_guest") !== "true") {
         router.push("/");
@@ -35,7 +46,17 @@ export default function DashboardPage() {
     }
 
     if (!localStorage.getItem("hifdh_onboarded")) {
-      setShowOnboarding(true);
+      if (isAuthenticated) {
+        fetch("/api/user/sessions")
+          .then(r => r.json())
+          .then(d => {
+            setSessionCount(d.sessions?.length ?? 0);
+            setShowOnboarding(true);
+          })
+          .catch(() => setShowOnboarding(true));
+      } else {
+        setShowOnboarding(true);
+      }
     }
   }, [isAuthenticated, isAuthLoading, router]);
 
@@ -44,13 +65,10 @@ export default function DashboardPage() {
     refreshData();
   };
 
-  console.log('surah groups:', surahGroups.length);
-  console.log('revision queue:', revisionQueue);
-
   let selectedAyah = null;
   let surahName = "";
   let translatedName = "";
-  
+
   if (selectedAyahKey) {
     for (const group of surahGroups) {
       const ayah = group.ayahs.find(a => a.verseKey === selectedAyahKey);
@@ -69,29 +87,56 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 relative overflow-hidden">
-      {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
+      {showOnboarding && (
+        <OnboardingFlow
+          onComplete={handleOnboardingComplete}
+          isAuthenticated={isAuthenticated}
+          firstName={user?.firstName}
+          sessionCount={sessionCount}
+        />
+      )}
       <DashboardHeader />
-      <StatCards />
+      <StatCards
+        totalTracked={stats?.totalTracked ?? 0}
+        currentStreak={currentStreak}
+        healthScore={stats?.overallHealthScore ?? 0}
+      />
       {isTrulyNewUser && !showOnboarding && (
         <div className="bg-zinc-800/50 border border-zinc-700/50 p-4 rounded-xl text-sm text-zinc-300">
           Gray squares are ayahs you haven&apos;t memorized yet. They&apos;ll turn green as you track your progress.
         </div>
       )}
       <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
-        <AyahHeatmap
-          surahGroups={surahGroups}
-          stats={stats}
-          isLoading={isLoading}
-          onSelectAyah={setSelectedAyahKey}
-          selectedAyah={selectedAyahKey}
-        />
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              {dataSource === "api" ? (
+                <span className="text-xs text-emerald-500 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                  Live
+                </span>
+              ) : (
+                <span className="text-xs text-zinc-500 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 inline-block" />
+                  Demo
+                </span>
+              )}
+            </div>
+            <TrackSurahButton onSurahAdded={refreshData} />
+          </div>
+          <AyahHeatmap
+            surahGroups={surahGroups}
+            stats={stats}
+            isLoading={isLoading}
+            onSelectAyah={setSelectedAyahKey}
+            selectedAyah={selectedAyahKey}
+          />
+        </div>
         <div className="h-[600px] xl:h-auto">
-          <RevisionQueue 
-            items={revisionQueue} 
+          <RevisionQueue
+            items={revisionQueue}
             onMarkRevised={markRevised}
-            onAyahClick={(ayah) => {
-              setSelectedAyahKey(ayah.verseKey);
-            }}
+            onAyahClick={(ayah) => setSelectedAyahKey(ayah.verseKey)}
           />
         </div>
       </div>

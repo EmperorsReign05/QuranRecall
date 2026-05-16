@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 
 import { hifdhService, type DashboardData } from "@/lib/hifdhService";
+import { mapSessionsToEngagements, mergeWithLocalEngagements } from "@/lib/sessionMapper";
+import { engagementStore } from "@/lib/engagementStore";
+import { applyDecay, buildRevisionQueue, calculateHifdhStats, groupBySurah } from "@/lib/decay";
+import { SURAH_META, SURAH_META_MAP } from "@/data/surahMeta";
 import type {
   DifficultyRating,
   HifdhStats,
@@ -10,12 +14,19 @@ import type {
   SurahGroup,
   VerseKey,
 } from "@/types/hifdh";
+import type { ReadingSession, UserStreak } from "@/lib/userApi";
+
+type DataSource = "api" | "local";
 
 type UseHifdhResult = {
   surahGroups: SurahGroup[];
   stats: HifdhStats | null;
   revisionQueue: RevisionQueueItem[];
   isLoading: boolean;
+  isAuthenticated: boolean;
+  currentStreak: number;
+  longestStreak: number;
+  dataSource: DataSource;
   markRevised: (verseKey: VerseKey) => void;
   setDifficulty: (verseKey: VerseKey, rating: DifficultyRating) => void;
   refreshData: () => void;
@@ -35,17 +46,84 @@ function emptyDashboard(): DashboardData {
   };
 }
 
+function createSurahNameMap(): Map<number, string> {
+  return new Map(
+    Array.from(SURAH_META_MAP.values()).map((surah) => [surah.number, surah.nameSimple])
+  );
+}
+
+function buildDashboardFromEngagements(engagements: ReturnType<typeof mergeWithLocalEngagements>): DashboardData {
+  const decayed = applyDecay(engagements);
+  return {
+    surahGroups: groupBySurah(decayed, SURAH_META),
+    stats: calculateHifdhStats(decayed),
+    revisionQueue: buildRevisionQueue(decayed, createSurahNameMap()),
+  };
+}
+
 export function useHifdh(): UseHifdhResult {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [dataSource, setDataSource] = useState<DataSource>("local");
+  const [streaks, setStreaks] = useState<UserStreak>({ current_streak: 0, longest_streak: 0 });
 
   const refreshData = () => {
     setData(hifdhService.getDashboardData());
   };
 
   useEffect(() => {
-    refreshData();
-    setIsLoading(false);
+    let isMounted = true;
+
+    async function loadData() {
+      try {
+        const meRes = await fetch("/api/auth/me");
+        const meData = await meRes.json();
+
+        if (!isMounted) return;
+
+        if (meData.isAuthenticated) {
+          setIsAuthenticated(true);
+
+          const sessionsRes = await fetch("/api/user/sessions");
+          if (!sessionsRes.ok) throw new Error("sessions fetch failed");
+
+          const { sessions, streaks: fetchedStreaks } = await sessionsRes.json() as {
+            sessions: ReadingSession[];
+            streaks: UserStreak;
+          };
+
+          if (!isMounted) return;
+
+          if (fetchedStreaks) setStreaks(fetchedStreaks);
+
+          if (sessions.length > 0) {
+            const apiEngagements = mapSessionsToEngagements(sessions);
+            const localEngagements = engagementStore.getAll();
+            const merged = mergeWithLocalEngagements(apiEngagements, localEngagements);
+            engagementStore.bulkWrite(merged);
+            setData(buildDashboardFromEngagements(merged));
+            setDataSource("api");
+          } else {
+            setData(hifdhService.getDashboardData());
+            setDataSource("local");
+          }
+        } else {
+          setData(hifdhService.getDashboardData());
+          setDataSource("local");
+        }
+      } catch {
+        if (isMounted) {
+          setData(hifdhService.getDashboardData());
+          setDataSource("local");
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+
+    loadData();
+    return () => { isMounted = false; };
   }, []);
 
   const markRevised = (verseKey: VerseKey): void => {
@@ -63,6 +141,10 @@ export function useHifdh(): UseHifdhResult {
     stats: data?.stats ?? null,
     revisionQueue: resolvedData.revisionQueue,
     isLoading,
+    isAuthenticated,
+    currentStreak: streaks.current_streak,
+    longestStreak: streaks.longest_streak,
+    dataSource,
     markRevised,
     setDifficulty,
     refreshData,

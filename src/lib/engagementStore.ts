@@ -83,6 +83,10 @@ export class EngagementStore {
     return this.read();
   }
 
+  bulkWrite(engagements: AyahEngagement[]): void {
+    this.write(engagements);
+  }
+
   get(verseKey: VerseKey): AyahEngagement | null {
     return this.read().find((engagement) => engagement.verseKey === verseKey) ?? null;
   }

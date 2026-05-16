@@ -1,87 +1,98 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+
+async function tryPostReadingSession(
+  accessToken: string,
+  clientId: string,
+  userApiBase: string,
+  verseKey: string
+): Promise<Response> {
+  const paths = [
+    `${userApiBase}/auth/v1/reading-sessions`,
+    `${userApiBase}/api/v1/reading-sessions`,
+    `${userApiBase}/v1/reading-sessions`,
+  ];
+
+  const headers = {
+    "x-auth-token": accessToken,
+    "x-client-id": clientId,
+    "Content-Type": "application/json",
+  };
+  const body = JSON.stringify({ verse_key: verseKey });
+
+  for (const url of paths) {
+    const res = await fetch(url, { method: "POST", headers, body });
+    const text = await res.clone().text();
+    console.log(`Reading session [${url}]:`, res.status, text);
+    if (res.ok) return res;
+  }
+
+  return paths.reduce<Promise<Response>>(
+    (_, url) => fetch(url, { method: "POST", headers, body }),
+    Promise.resolve(new Response("", { status: 404 }))
+  );
+}
 
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('qf_session');
+    const sessionCookie = cookieStore.get("qf_session");
 
     if (!sessionCookie) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const session = JSON.parse(sessionCookie.value);
     const { verseKey } = await request.json();
 
-    const doRequest = async (accessToken: string) => {
-      const url = `${process.env.QURAN_USER_API_BASE}/auth/v1/reading-sessions`;
-      
-      return fetch(url, {
-        method: 'POST',
-        headers: {
-          'x-auth-token': accessToken,
-          'x-client-id': process.env.QURAN_USER_CLIENT_ID!,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ verse_key: verseKey }),
-      });
-    };
+    const clientId = process.env.QURAN_USER_CLIENT_ID!;
+    const userApiBase = process.env.QURAN_USER_API_BASE!;
 
-    let response = await doRequest(session.accessToken);
+    let response = await tryPostReadingSession(
+      session.accessToken,
+      clientId,
+      userApiBase,
+      verseKey
+    );
 
     if (response.status === 401) {
-      const refreshRes = await fetch(new URL('/api/auth/refresh', request.url), {
-        method: 'POST',
-        headers: { cookie: request.headers.get('cookie') || '' },
+      const refreshRes = await fetch(new URL("/api/auth/refresh", request.url), {
+        method: "POST",
+        headers: { cookie: request.headers.get("cookie") || "" },
       });
 
       if (refreshRes.ok) {
         const newCookieStore = await cookies();
-        const newSessionStr = newCookieStore.get('qf_session');
+        const newSessionStr = newCookieStore.get("qf_session");
         if (newSessionStr) {
           const newSession = JSON.parse(newSessionStr.value);
-          response = await doRequest(newSession.accessToken);
+          response = await tryPostReadingSession(
+            newSession.accessToken,
+            clientId,
+            userApiBase,
+            verseKey
+          );
         }
       }
     }
 
     if (!response.ok) {
-      const errText = await response.text();
-      console.error('Failed to create reading session:', response.status, errText);
-      
-      if (response.status === 404) {
-        const fallbackUrl = `${process.env.QURAN_USER_API_BASE}/content/api/v4/reading-sessions`;
-        response = await fetch(fallbackUrl, {
-          method: 'POST',
-          headers: {
-            'x-auth-token': session.accessToken,
-            'x-client-id': process.env.QURAN_USER_CLIENT_ID!,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ verse_key: verseKey }),
-        });
-        
-        if (!response.ok) {
-          const fallbackText = await response.text();
-          console.log('Reading session response:', response.status, fallbackText);
-          return NextResponse.json({ error: 'Failed to record session' }, { status: response.status });
-        }
-      } else {
-        return NextResponse.json({ error: 'Failed to record session' }, { status: response.status });
-      }
+      return NextResponse.json(
+        { error: "Failed to record session" },
+        { status: response.status }
+      );
     }
 
-    const textData = await response.text();
-    console.log('Reading session response:', response.status, textData);
-    let data;
+    const text = await response.text();
+    let data: unknown;
     try {
-      data = JSON.parse(textData);
+      data = JSON.parse(text);
     } catch {
-      data = { message: textData };
+      data = { message: text };
     }
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Reading session error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Reading session error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
