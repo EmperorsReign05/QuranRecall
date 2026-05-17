@@ -20,6 +20,7 @@ interface RawChapter {
 interface RawVerse {
   verse_key: VerseKey;
   text_uthmani: string;
+  text_indopak?: string;
   translations?: Array<{
     text: string;
   }>;
@@ -140,6 +141,7 @@ function mapVerse(verse: RawVerse): AyahContent {
   return {
     verseKey: verse.verse_key,
     arabicText: verse.text_uthmani,
+    arabicIndoPakText: verse.text_indopak,
     translationText: verse.translations?.[0]?.text ?? "",
   };
 }
@@ -176,7 +178,7 @@ export async function fetchVersesByChapter(
     }
 
     const response = await apiFetch<RawVersesResponse>(
-      `/verses/by_chapter/${chapterNumber}?translations=${translationId}&fields=text_uthmani,verse_key,verse_number&per_page=50&page=${currentPage}`,
+      `/verses/by_chapter/${chapterNumber}?translations=${translationId}&fields=text_uthmani,text_indopak,verse_key,verse_number&per_page=50&page=${currentPage}`,
     );
 
     verses.push(...response.verses.map(mapVerse));
@@ -189,7 +191,7 @@ export async function fetchVersesByChapter(
 
 export async function fetchAyahContent(verseKey: VerseKey): Promise<AyahContent> {
   const response = await apiFetch<{ verse: RawVerse }>(
-    `/verses/by_key/${verseKey}?translations=20&fields=text_uthmani,verse_key,verse_number`,
+    `/verses/by_key/${verseKey}?translations=20&fields=text_uthmani,text_indopak,verse_key,verse_number`,
   );
 
   return mapVerse(response.verse);

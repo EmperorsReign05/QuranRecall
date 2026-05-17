@@ -2,6 +2,8 @@ import { NextResponse, NextRequest } from 'next/server';
 import { fetchAyahContent, QuranApiError } from '@/lib/quranContentApi';
 import type { VerseKey } from '@/types/hifdh';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ verseKey: string }> }
@@ -18,7 +20,7 @@ export async function GET(
     return NextResponse.json(content, {
       status: 200,
       headers: {
-        'Cache-Control': 's-maxage=86400, stale-while-revalidate'
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
       }
     });
   } catch (error) {

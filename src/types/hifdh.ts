@@ -61,5 +61,6 @@ export interface HifdhStats {
 export interface AyahContent {
   verseKey: VerseKey;
   arabicText: string;
+  arabicIndoPakText?: string;
   translationText: string;
 }

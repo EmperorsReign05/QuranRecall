@@ -27,7 +27,7 @@ export function useAyahContent(verseKey: VerseKey | null) {
     setIsLoading(true);
     setError(null);
 
-    fetch(`/api/ayah/${verseKey}`)
+    fetch(`/api/ayah/${verseKey}?v=2`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch ayah content");
         return res.json();

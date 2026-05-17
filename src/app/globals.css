@@ -61,4 +61,10 @@
   .text-balance {
     text-wrap: balance;
   }
+  .font-amiri {
+    font-family: "Amiri Quran", serif;
+  }
+  .font-scheherazade {
+    font-family: "Scheherazade New", serif;
+  }
 }

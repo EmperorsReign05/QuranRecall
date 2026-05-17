@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link 
-          href="https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Scheherazade+New:wght@400;700&display=swap"
           rel="stylesheet"
         />
       </head>
