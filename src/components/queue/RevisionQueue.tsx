@@ -50,7 +50,7 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
       setExpandedItem(verseKey);
       setExpandedContent(null);
       setIsExpandingLoading(true);
-      fetch(`/api/ayah?verseKey=${verseKey}`)
+      fetch(`/api/ayah/${verseKey}`)
         .then(r => r.json())
         .then(data => {
           setExpandedContent(data);
@@ -73,7 +73,7 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
     return (
       <div key={label} className="flex flex-col">
         {showSectionLabels && (
-          <div className="flex items-center gap-1.5 pt-4 pb-1 border-t border-zinc-800 first:border-0 first:pt-2">
+          <div className="flex items-center gap-1.5 pt-4 pb-1 border-t border-zinc-100 dark:border-zinc-800 first:border-0 first:pt-2">
             <div className={`w-1.5 h-1.5 rounded-full ${dotColorClass}`} />
             <span className={`text-xs font-medium ${dotColorClass.replace('bg-', 'text-')}`}>
               {label}
@@ -97,7 +97,7 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
                 exit={{ x: -20, opacity: 0, height: 0, marginTop: 0, marginBottom: 0, paddingBottom: 0, paddingTop: 0 }}
                 transition={{ duration: 0.25, ease: 'easeInOut' }}
                 key={item.ayah.verseKey}
-                className={`py-3 flex flex-col w-full overflow-hidden ${!isLast ? 'border-b border-zinc-800/60' : ''}`}
+                className={`py-3 flex flex-col w-full overflow-hidden ${!isLast ? 'border-b border-zinc-150 dark:border-zinc-800/60' : ''}`}
                 onClick={() => onAyahClick(item.ayah, item.surahName)}
               >
                 <div className="flex items-center gap-3 w-full cursor-pointer">
@@ -105,22 +105,22 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
                   
                   <div className="flex-1 flex flex-col min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium truncate">{item.surahName}</span>
-                      <span className="text-xs text-zinc-500 whitespace-nowrap">{item.ayah.verseKey}</span>
+                      <span className="text-sm font-semibold truncate text-zinc-800 dark:text-zinc-200">{item.surahName}</span>
+                      <span className="text-xs text-zinc-400 dark:text-zinc-500 whitespace-nowrap">{item.ayah.verseKey}</span>
                       
                       {item.ayah.memoryState === 'review' && (
-                        <span className="text-[10px] rounded px-1.5 py-0.5 bg-amber-900/40 text-amber-300 ml-1">
+                        <span className="text-[10px] rounded px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-300 border border-amber-100/50 dark:border-amber-900/30 ml-1">
                           Review soon
                         </span>
                       )}
                       {item.ayah.memoryState === 'weak' && (
-                        <span className="text-[10px] rounded px-1.5 py-0.5 bg-red-900/40 text-red-300 ml-1">
+                        <span className="text-[10px] rounded px-1.5 py-0.5 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-300 border border-red-100/50 dark:border-red-900/30 ml-1">
                           Needs work
                         </span>
                       )}
                     </div>
                     
-                    <div className="w-full h-[2px] bg-zinc-800 rounded-full mt-2 overflow-hidden flex">
+                    <div className="w-full h-[2px] bg-zinc-100 dark:bg-zinc-800 rounded-full mt-2 overflow-hidden flex">
                       <div 
                         className={`h-full ${item.ayah.memoryState === 'weak' ? 'bg-red-500' : item.ayah.memoryState === 'review' ? 'bg-amber-400' : 'bg-emerald-500'}`} 
                         style={{ width: `${Math.max(5, item.ayah.strengthScore * 100)}%` }} 
@@ -129,11 +129,11 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
                   </div>
                   
                   <div className="flex flex-col items-end gap-1.5 shrink-0 pl-2">
-                    <span className="text-xs text-zinc-500">~{item.estimatedSeconds}s</span>
+                    <span className="text-xs text-zinc-400 dark:text-zinc-500">~{item.estimatedSeconds}s</span>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="h-7 px-3 text-xs border-zinc-700 text-zinc-300 hover:border-zinc-500 bg-transparent"
+                      className="h-7 px-3 text-xs border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 bg-transparent"
                       onClick={(e) => handleReviseClick(e, item.ayah.verseKey)}
                     >
                       Revise
@@ -151,11 +151,11 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
                       className="overflow-hidden"
                     >
                       <div className="pt-3 pl-4">
-                        <div className="bg-zinc-800/50 rounded p-4 mb-3 font-arabic text-right text-zinc-200 min-h-[80px] flex flex-col justify-center border border-zinc-700/50">
+                        <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded p-4 mb-3 font-arabic text-right text-zinc-800 dark:text-zinc-200 min-h-[80px] flex flex-col justify-center border border-zinc-200 dark:border-zinc-700/50 shadow-inner">
                           {isExpandingLoading ? (
                             <div className="w-full">
-                              <div className="animate-pulse bg-zinc-700/50 rounded h-5 w-full mb-2"></div>
-                              <div className="animate-pulse bg-zinc-700/50 rounded h-5 w-3/4 ml-auto"></div>
+                              <div className="animate-pulse bg-zinc-200 dark:bg-zinc-700/50 rounded h-5 w-full mb-2"></div>
+                              <div className="animate-pulse bg-zinc-200 dark:bg-zinc-700/50 rounded h-5 w-3/4 ml-auto"></div>
                             </div>
                           ) : expandedContent ? (
                             <>
@@ -168,13 +168,13 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
                               </p>
                               {expandedContent.translationText && (
                                 <p 
-                                  className="text-xs text-zinc-400 leading-relaxed mt-3 text-left"
+                                  className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed mt-3 text-left"
                                   dangerouslySetInnerHTML={{ __html: expandedContent.translationText }}
-                                />
+                               />
                               )}
                             </>
                           ) : (
-                            <p className="text-lg">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ {item.ayah.verseKey.split(':')[1]}</p>
+                            <p className="text-sm text-zinc-400 dark:text-zinc-500 italic text-center">Failed to load verse text</p>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
@@ -215,16 +215,16 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold tracking-tight">Today&apos;s Revision</h2>
           <div className="flex items-center gap-3">
-            <div className="bg-zinc-800 text-zinc-300 text-xs rounded-full px-2 py-0.5">
+            <div className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-xs rounded-full px-2 py-0.5 font-semibold">
               {items.length} ayahs
             </div>
-            <div className="text-xs text-zinc-500">
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
               ~{totalMinutes} min
             </div>
           </div>
         </div>
         
-        <div className="w-full h-[3px] rounded-full bg-zinc-800 overflow-hidden">
+        <div className="w-full h-[3px] rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
           <motion.div 
             className="h-full bg-emerald-500"
             initial={{ width: 0 }}
@@ -245,7 +245,7 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
             className="h-full flex flex-col items-center justify-center text-center py-12"
           >
             <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-3" strokeWidth={1.5} />
-            <h3 className="text-sm font-medium text-zinc-300 mb-1">Your hifdh is in good health.</h3>
+            <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-300 mb-1">Your hifdh is in good health.</h3>
             <p className="text-sm text-zinc-500 max-w-[200px]">
               You&apos;ve completed all revisions for today.
             </p>
@@ -253,7 +253,7 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
         ) : items.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center py-12">
             <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-3" strokeWidth={1.5} />
-            <h3 className="text-sm font-medium text-zinc-300 mb-1">Your hifdh is in good health.</h3>
+            <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-300 mb-1">Your hifdh is in good health.</h3>
             <p className="text-sm text-zinc-500 max-w-[200px]">
               No revisions due today. Check back tomorrow.
             </p>

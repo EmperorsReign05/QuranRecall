@@ -65,7 +65,7 @@ function AyahDisplay({
     <div className="text-center">
       <div
         dir="rtl"
-        className={`${fontClass} transition-all duration-500 select-none ${
+        className={`${fontClass} text-zinc-850 dark:text-zinc-100 transition-all duration-500 select-none ${
           blurred ? "blur-md pointer-events-none" : ""
         }`}
       >
@@ -122,9 +122,9 @@ function WindowDisplay({
             key={keys[i]}
             className={`transition-all duration-500 ${blurred ? "blur-md select-none" : ""}`}
           >
-            <span className={fontClass}>{textToDisplay}</span>
+            <span className={`${fontClass} text-zinc-850 dark:text-zinc-100`}>{textToDisplay}</span>
             {!blurred && i < contents.length - 1 && (
-              <div className="border-b border-zinc-800 my-2" />
+              <div className="border-b border-zinc-200 dark:border-zinc-800 my-2" />
             )}
           </div>
         );
@@ -154,7 +154,7 @@ function RepCounter({
           <div
             key={i}
             className={`w-3 h-3 rounded-full transition-all ${
-              i < current ? "bg-emerald-500 scale-110" : "bg-zinc-700"
+              i < current ? "bg-emerald-500 scale-110" : "bg-zinc-200 dark:bg-zinc-700"
             }`}
           />
         ))}
@@ -182,16 +182,16 @@ function ProgressBar({
   surahName: string;
 }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/90 backdrop-blur-md border-t border-zinc-800 px-6 py-3 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 px-6 py-3.5 z-50 shadow-lg">
       <div className="max-w-2xl mx-auto flex items-center gap-4">
-        <span className="text-xs text-zinc-500 shrink-0">{surahName}</span>
-        <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+        <span className="text-xs text-zinc-500 dark:text-zinc-400 shrink-0 font-semibold">{surahName}</span>
+        <div className="flex-1 h-2 bg-zinc-150 dark:bg-zinc-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-emerald-500 rounded-full transition-all duration-500"
             style={{ width: `${(current / total) * 100}%` }}
           />
         </div>
-        <span className="text-xs text-zinc-400 shrink-0 font-medium">
+        <span className="text-xs text-zinc-650 dark:text-zinc-300 shrink-0 font-semibold">
           {current} / {total}
         </span>
       </div>
@@ -324,8 +324,8 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
         </div>
 
         {/* Script Selection */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4">
-          <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-3">Arabic Script Style</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 mb-4 shadow-sm">
+          <p className="text-xs text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wider mb-3">Arabic Script Style</p>
           <div className="grid grid-cols-2 gap-2">
             {(["uthmani", "indopak"] as ArabicScript[]).map((scr) => (
               <button
@@ -333,14 +333,14 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
                 onClick={() => changeScript(scr)}
                 className={`p-3 rounded-xl text-left transition-all border ${
                   script === scr
-                    ? "border-emerald-500 bg-emerald-950/40 text-emerald-400"
-                    : "border-zinc-700 bg-zinc-800/30 text-zinc-400 hover:border-zinc-600"
+                    ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
+                    : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-800/30 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700"
                 }`}
               >
-                <p className="font-semibold text-sm">
+                <p className={`font-semibold text-sm ${script === scr ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-700 dark:text-zinc-300"}`}>
                   {scr === "uthmani" ? "Standard (Uthmani)" : "Indo-Pak Script"}
                 </p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">
+                <p className={`text-[10px] mt-0.5 ${script === scr ? "text-emerald-600 dark:text-emerald-500" : "text-zinc-500"}`}>
                   {scr === "uthmani" ? "Common Medina copy" : "Standard South Asian copy"}
                 </p>
               </button>
@@ -349,8 +349,8 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
         </div>
 
         {/* Method selector */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-6">
-          <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-3">Method</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 mb-6 shadow-sm">
+          <p className="text-xs text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wider mb-3">Method</p>
           <div className="grid grid-cols-2 gap-2">
             {(["standard", "quick"] as Method[]).map((m) => (
               <button
@@ -358,12 +358,12 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
                 onClick={() => setMethod(m)}
                 className={`p-3 rounded-xl text-left transition-all border ${
                   method === m
-                    ? "border-emerald-500 bg-emerald-950/40 text-emerald-400"
-                    : "border-zinc-700 bg-zinc-800/30 text-zinc-400 hover:border-zinc-600"
+                    ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
+                    : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-800/30 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700"
                 }`}
               >
-                <p className="font-semibold text-sm capitalize">{m}</p>
-                <p className="text-xs text-zinc-500 mt-1">
+                <p className={`font-semibold text-sm capitalize ${method === m ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-700 dark:text-zinc-300"}`}>{m}</p>
+                <p className={`text-xs mt-1 ${method === m ? "text-emerald-600 dark:text-emerald-500" : "text-zinc-500"}`}>
                   {m === "standard"
                     ? `${METHOD_CONFIG.standard.lookReps} look · ${METHOD_CONFIG.standard.recallReps} recall · ${METHOD_CONFIG.standard.windowReps} window`
                     : `${METHOD_CONFIG.quick.lookReps} look · ${METHOD_CONFIG.quick.recallReps} recall · ${METHOD_CONFIG.quick.windowReps} window`}
@@ -374,12 +374,12 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
         </div>
 
         {/* Technique explanation */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-8 text-sm text-zinc-400 space-y-2">
-          <p className="font-semibold text-zinc-200 text-sm">Growing Window Method</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 mb-8 text-sm text-zinc-650 dark:text-zinc-400 space-y-2 shadow-sm">
+          <p className="font-semibold text-zinc-800 dark:text-zinc-200 text-sm">Growing Window Method</p>
           <ol className="space-y-1.5 text-xs leading-relaxed list-decimal list-inside text-zinc-500">
-            <li>Read each verse aloud <strong className="text-zinc-300">{cfg.lookReps} times</strong> while looking</li>
-            <li>Recite from memory <strong className="text-zinc-300">{cfg.recallReps} times</strong> (text blurred)</li>
-            <li>Recite all verses from verse 1 to current, <strong className="text-zinc-300">{cfg.windowReps} times</strong></li>
+            <li>Read each verse aloud <strong className="text-zinc-750 dark:text-zinc-300">{cfg.lookReps} times</strong> while looking</li>
+            <li>Recite from memory <strong className="text-zinc-750 dark:text-zinc-300">{cfg.recallReps} times</strong> (text blurred)</li>
+            <li>Recite all verses from verse 1 to current, <strong className="text-zinc-750 dark:text-zinc-300">{cfg.windowReps} times</strong></li>
             <li>Repeat for each new verse — your window keeps growing</li>
           </ol>
         </div>
@@ -469,7 +469,7 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
         {/* Dynamic script toggle */}
         <button
           onClick={() => changeScript(script === "uthmani" ? "indopak" : "uthmani")}
-          className="text-xs flex items-center gap-1 border border-zinc-800 hover:border-zinc-700 bg-zinc-900 px-2 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 transition-all font-medium"
+          className="text-xs flex items-center gap-1 border border-zinc-250 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1.5 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all font-medium shadow-sm"
           title="Toggle Arabic script style"
         >
           <Type className="w-3.5 h-3.5 text-emerald-500" />
@@ -484,7 +484,7 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
 
       {/* Arabic text */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-4">
-        <div className="w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-2xl p-8 mb-6 shadow-xl">
+        <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-8 mb-6 shadow-md dark:shadow-xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={`${phase}-${currentAyah}-${script}`}
@@ -517,11 +517,11 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
         {(phase === "learn-recall" || phase === "window-review") && (
           <button
             onClick={() => setPeekActive(!peekActive)}
-            className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 mb-6 transition-colors border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 px-4 py-2 rounded-full shadow-md"
+            className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 mb-6 transition-all border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-900 px-4 py-2 rounded-full shadow-md"
           >
             {peekActive ? (
               <>
-                <EyeOff className="w-4 h-4 text-zinc-500" />
+                <EyeOff className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
                 Hide text
               </>
             ) : (

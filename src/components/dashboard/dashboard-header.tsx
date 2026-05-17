@@ -22,14 +22,14 @@ export function DashboardHeader() {
       </div>
       <div className="flex flex-col items-end gap-3">
         {isAuthenticated && user && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800/50 rounded-full border border-white/5">
-            <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-medium uppercase">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-zinc-800/50 rounded-full border border-zinc-200 dark:border-white/5 shadow-sm">
+            <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center text-xs font-medium uppercase">
               {user.firstName?.[0] || 'U'}
             </div>
-            <span className="text-sm text-zinc-300 hidden sm:block">
+            <span className="text-sm text-zinc-700 dark:text-zinc-300 hidden sm:block">
               Assalamu Alaykum, {user.firstName}
             </span>
-            <button onClick={logout} className="ml-2 text-zinc-500 hover:text-zinc-300" title="Logout">
+            <button onClick={logout} className="ml-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors" title="Logout">
               <LogOut className="w-4 h-4" />
             </button>
           </div>

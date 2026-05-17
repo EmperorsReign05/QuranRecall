@@ -40,11 +40,11 @@ export default function MemorizePage() {
       </div>
 
       {/* Search */}
-      <div className="flex items-center gap-2 bg-zinc-800/60 border border-zinc-700/60 rounded-xl px-4 py-3 mb-8">
-        <Search className="h-4 w-4 text-zinc-500 shrink-0" />
+      <div className="flex items-center gap-2 bg-white dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 rounded-xl px-4 py-3 mb-8 shadow-sm">
+        <Search className="h-4 w-4 text-zinc-400 dark:text-zinc-500 shrink-0" />
         <input
           autoFocus
-          className="bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none w-full"
+          className="bg-transparent text-sm text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 outline-none w-full"
           placeholder="Search by name or number..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -134,28 +134,32 @@ function SurahRow({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-zinc-800/50 transition-colors text-left group border border-transparent hover:border-zinc-700/50"
+      className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-left group border ${
+        isTracked
+          ? "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+          : "bg-transparent border-transparent hover:bg-white dark:hover:bg-zinc-800/50 hover:border-zinc-200 dark:hover:border-zinc-700/50 hover:shadow-sm"
+      }`}
     >
-      <div className="text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0">
+      <div className="text-zinc-400 group-hover:text-zinc-500 dark:group-hover:text-zinc-300 transition-colors shrink-0">
         {isTracked ? (
           <BookOpen className="w-4 h-4 text-emerald-500" />
         ) : (
-          <Circle className="w-4 h-4" />
+          <Circle className="w-4 h-4 text-zinc-300 dark:text-zinc-600" />
         )}
       </div>
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <span className="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[10px] font-medium text-zinc-400 shrink-0">
+        <span className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-[10px] font-medium text-zinc-500 dark:text-zinc-400 shrink-0">
           {surah.number}
         </span>
         <div className="min-w-0">
-          <p className="text-sm font-medium truncate">{surah.nameSimple}</p>
-          <p className="text-xs text-zinc-500">{surah.translatedName}</p>
+          <p className="text-sm font-semibold truncate text-zinc-800 dark:text-zinc-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{surah.nameSimple}</p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">{surah.translatedName}</p>
         </div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        <span className="text-xl font-arabic text-zinc-400">{surah.nameArabic}</span>
-        <span className="text-xs text-zinc-600">{surah.versesCount}v</span>
-        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+        <span className="text-xl font-arabic text-zinc-500 dark:text-zinc-400">{surah.nameArabic}</span>
+        <span className="text-xs text-zinc-400 dark:text-zinc-500">{surah.versesCount}v</span>
+        <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" />
       </div>
     </button>
   );
