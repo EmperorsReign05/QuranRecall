@@ -48,6 +48,7 @@ export function Button({
 
   return (
     <Comp
+      suppressHydrationWarning
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />

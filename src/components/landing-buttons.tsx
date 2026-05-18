@@ -7,8 +7,19 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 
-export function LandingButtons() {
+type LandingButtonsProps = {
+  className?: string;
+  primaryClassName?: string;
+  secondaryClassName?: string;
+};
+
+export function LandingButtons({
+  className,
+  primaryClassName,
+  secondaryClassName,
+}: LandingButtonsProps) {
   const { isAuthenticated, isLoading, login } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -24,7 +35,7 @@ export function LandingButtons() {
 
   if (!mounted || isLoading) {
     return (
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row opacity-50">
+      <div className={cn("mt-8 flex flex-col gap-3 sm:flex-row opacity-50", className)}>
         <Button size="lg" disabled>Loading...</Button>
       </div>
     );
@@ -32,8 +43,8 @@ export function LandingButtons() {
 
   if (isAuthenticated) {
     return (
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <Button asChild size="lg">
+      <div className={cn("mt-8 flex flex-col gap-3 sm:flex-row", className)}>
+        <Button asChild size="lg" className={primaryClassName}>
           <Link href="/dashboard">
             Open dashboard
             <ArrowRight className="h-4 w-4 ml-2" />
@@ -44,12 +55,21 @@ export function LandingButtons() {
   }
 
   return (
-    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-      <Button size="lg" onClick={login} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+    <div className={cn("mt-8 flex flex-col gap-3 sm:flex-row", className)}>
+      <Button
+        size="lg"
+        onClick={login}
+        className={cn("bg-emerald-600 text-white hover:bg-emerald-700", primaryClassName)}
+      >
         <LogIn className="h-4 w-4 mr-2" />
         Sign in with Quran.com
       </Button>
-      <Button variant="secondary" size="lg" onClick={handleGuestLogin}>
+      <Button
+        variant="secondary"
+        size="lg"
+        onClick={handleGuestLogin}
+        className={secondaryClassName}
+      >
         Continue as Guest (Dev)
         <ArrowRight className="h-4 w-4 ml-2" />
       </Button>
