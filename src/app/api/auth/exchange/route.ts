@@ -23,8 +23,6 @@ export async function POST(request: Request) {
     
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     const tokenUrl = `${process.env.QURAN_USER_AUTH_URL}/oauth2/token`;
-    
-    // Exchanging code at token URL (debug logs removed)
 
     const tokenRes = await fetch(tokenUrl, {
       method: 'POST',
