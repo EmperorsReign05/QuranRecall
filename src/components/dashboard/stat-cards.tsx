@@ -11,7 +11,7 @@ interface StatCardsProps {
 
 export function StatCards({ totalTracked = 0, currentStreak = 0, healthScore = 0 }: StatCardsProps) {
   const stats = [
-    { label: "Current streak", value: `${currentStreak} days`, icon: Flame },
+    { label: "Current streak", value: currentStreak > 0 ? `${currentStreak} days` : "Start today", icon: Flame, highlight: currentStreak === 0 },
     { label: "Ayahs tracked", value: String(totalTracked), icon: CalendarCheck },
     { label: "Health score", value: `${Math.round(healthScore)}%`, icon: BookOpenCheck },
   ];
@@ -25,7 +25,9 @@ export function StatCards({ totalTracked = 0, currentStreak = 0, healthScore = 0
             <CardContent className="flex items-start justify-between p-5">
               <div>
                 <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="mt-3 text-3xl font-semibold">{stat.value}</p>
+                <p className={`mt-3 ${stat.highlight ? "text-sm font-medium text-teal-600" : "text-3xl font-semibold"}`}>
+                  {stat.value}
+                </p>
               </div>
               <div className="rounded-md bg-accent p-2 text-primary">
                 <Icon className="h-5 w-5" />

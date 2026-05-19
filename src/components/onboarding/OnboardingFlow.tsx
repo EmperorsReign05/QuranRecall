@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, BookOpen, Sprout, LogIn, ChevronRight, Check } from "lucide-react";
+import { BookOpen, ChevronRight, LogIn, Shield, Sprout } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { engagementStore } from "@/lib/engagementStore";
-import { BEGINNER_SURAHS, JUZ_AMMA_SURAHS, SURAH_META, SURAH_META_MAP } from "@/data/surahMeta";
+import {
+  BEGINNER_SURAHS,
+  JUZ_AMMA_SURAHS,
+  SURAH_META,
+  SURAH_META_MAP,
+} from "@/data/surahMeta";
 import type { VerseKey } from "@/types/hifdh";
 
 export interface OnboardingFlowProps {
@@ -27,213 +33,389 @@ const TIME_OPTIONS: { label: string; value: TimeAgo }[] = [
   { label: "Longer", value: 90 },
 ];
 
-export function OnboardingFlow({ onComplete, isAuthenticated, firstName, sessionCount = 0 }: OnboardingFlowProps) {
-  const [step, setStep] = useState(isAuthenticated ? 2 : 1);
-  const [intent, setIntent] = useState<Intent>(null);
+export function OnboardingFlow({
+  onComplete,
+  isAuthenticated,
+  firstName,
+  sessionCount = 0,
+}: OnboardingFlowProps) {
   const router = useRouter();
-
-  // If auth resolves after initial render and we're still on the sign-in step, advance
-  useEffect(() => {
-    if (isAuthenticated && step === 1) {
-      setStep(2);
-    }
-  }, [isAuthenticated, step]);
-
+  const [step, setStep] = useState(1);
+  const [intent, setIntent] = useState<Intent>(null);
   const [selectedStartSurah, setSelectedStartSurah] = useState<number | null>(null);
   const [selectedSomeSurahs, setSelectedSomeSurahs] = useState<Set<number>>(new Set());
-  const [includesAyatulKursi, setIncludesAyatulKursi] = useState(false);
   const [maintainLevel, setMaintainLevel] = useState<MaintainLevel>(null);
-  const [selectedJuz, setSelectedJuz] = useState<Set<number>>(new Set());
+  const [selectedJuz] = useState<Set<number>>(new Set([30]));
   const [lastRevised, setLastRevised] = useState<TimeAgo>(3);
+
+  const isAuthenticatedEmpty = Boolean(isAuthenticated) && sessionCount === 0;
+
+  const completeOnboarding = () => {
+    localStorage.setItem("hifdh_onboarded", "true");
+    onComplete();
+  };
 
   const getVerseKeysToDeclare = (): VerseKey[] => {
     const keys: VerseKey[] = [];
+
     if (intent === "start" && selectedStartSurah) {
-      const surah = SURAH_META_MAP.get(selectedStartSurah)!;
-      for (let i = 1; i <= surah.versesCount; i++) keys.push(`${surah.number}:${i}` as VerseKey);
-    } else if (intent === "some") {
-      selectedSomeSurahs.forEach(n => {
-        const s = SURAH_META_MAP.get(n)!;
-        for (let i = 1; i <= s.versesCount; i++) keys.push(`${s.number}:${i}` as VerseKey);
-      });
-      if (includesAyatulKursi) keys.push("2:255" as VerseKey);
-    } else if (intent === "maintain") {
-      let nums: number[] = [];
-      if (maintainLevel === "juz_amma") nums = JUZ_AMMA_SURAHS.map(s => s.number);
-      else if (maintainLevel === "full") nums = SURAH_META.map(s => s.number);
-      else if (maintainLevel === "multi_juz") {
-        if (selectedJuz.has(30)) nums.push(...JUZ_AMMA_SURAHS.map(s => s.number));
-        if (selectedJuz.has(1)) nums.push(1, 2);
+      const surah = SURAH_META_MAP.get(selectedStartSurah);
+      if (!surah) return keys;
+
+      for (let verse = 1; verse <= surah.versesCount; verse += 1) {
+        keys.push(`${surah.number}:${verse}` as VerseKey);
       }
-      nums.forEach(n => {
-        const s = SURAH_META_MAP.get(n)!;
-        for (let i = 1; i <= s.versesCount; i++) keys.push(`${s.number}:${i}` as VerseKey);
+      return keys;
+    }
+
+    if (intent === "some") {
+      selectedSomeSurahs.forEach((number) => {
+        const surah = SURAH_META_MAP.get(number);
+        if (!surah) return;
+
+        for (let verse = 1; verse <= surah.versesCount; verse += 1) {
+          keys.push(`${surah.number}:${verse}` as VerseKey);
+        }
+      });
+      return keys;
+    }
+
+    if (intent === "maintain") {
+      let surahNumbers: number[] = [];
+
+      if (maintainLevel === "juz_amma") {
+        surahNumbers = JUZ_AMMA_SURAHS.map((surah) => surah.number);
+      } else if (maintainLevel === "full") {
+        surahNumbers = SURAH_META.map((surah) => surah.number);
+      } else if (maintainLevel === "multi_juz") {
+        if (selectedJuz.has(30)) {
+          surahNumbers = JUZ_AMMA_SURAHS.map((surah) => surah.number);
+        }
+      }
+
+      surahNumbers.forEach((number) => {
+        const surah = SURAH_META_MAP.get(number);
+        if (!surah) return;
+
+        for (let verse = 1; verse <= surah.versesCount; verse += 1) {
+          keys.push(`${surah.number}:${verse}` as VerseKey);
+        }
       });
     }
+
     return keys;
   };
 
   const handleComplete = () => {
     const keys = getVerseKeysToDeclare();
+
     if (keys.length > 0) {
-      if (intent === "start") {
+      if (intent === "start" && selectedStartSurah) {
         localStorage.setItem("hifdh_onboarding_target", String(selectedStartSurah));
       } else {
         engagementStore.declareMemorized(keys, lastRevised, 1);
       }
     }
+
     localStorage.setItem("hifdh_onboarded", "true");
+
     if (intent === "start" && selectedStartSurah) {
       router.push(`/memorize/surah/${selectedStartSurah}`);
-      onComplete();
-    } else {
-      onComplete();
     }
+
+    onComplete();
   };
 
-  const renderStep1Connect = () => (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="max-w-md mx-auto text-center">
-      <div className="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-500">
-        <BookOpen className="w-7 h-7" />
+  const handleAuthenticatedEmptyStepTwoComplete = () => {
+    if (selectedSomeSurahs.size > 0) {
+      const keys: VerseKey[] = [];
+
+      selectedSomeSurahs.forEach((number) => {
+        const surah = SURAH_META_MAP.get(number);
+        if (!surah) return;
+
+        for (let verse = 1; verse <= surah.versesCount; verse += 1) {
+          keys.push(`${surah.number}:${verse}` as VerseKey);
+        }
+      });
+
+      if (keys.length > 0) {
+        engagementStore.declareMemorized(keys, lastRevised, 1);
+      }
+    }
+
+    completeOnboarding();
+  };
+
+  const renderAuthStepOne = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="mx-auto max-w-md text-center"
+    >
+      <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
+        <BookOpen className="h-7 w-7" />
       </div>
-      <h1 className="text-2xl font-bold tracking-tight mb-3">Track your Quran memorization</h1>
-      <p className="text-zinc-400 text-sm leading-relaxed mb-8">
-        Connect your Quran.com account to get started. Your reading history syncs automatically.
+      <h1 className="mb-3 text-2xl font-bold tracking-tight">
+        Welcome{firstName ? `, ${firstName}` : ""}
+      </h1>
+      <p className="mb-8 text-sm leading-relaxed text-zinc-400">
+        We&apos;ll track your memorization automatically as you read on Quran.com.
+      </p>
+      <Button
+        className="w-full bg-emerald-500 py-5 text-base text-white hover:bg-emerald-600"
+        onClick={() => setStep(2)}
+      >
+        Continue
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+    </motion.div>
+  );
+
+  const renderAuthStepTwo = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="mx-auto max-w-md"
+    >
+      <div className="mb-6 text-center">
+        <h2 className="mb-2 text-xl font-bold tracking-tight">
+          Want to add surahs manually too?
+        </h2>
+        <p className="text-sm text-zinc-400">
+          This is optional. You can also skip this and let Quran.com reading
+          history populate the heatmap automatically.
+        </p>
+      </div>
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        {JUZ_AMMA_SURAHS.map((surah) => {
+          const isSelected = selectedSomeSurahs.has(surah.number);
+
+          return (
+            <button
+              key={surah.number}
+              type="button"
+              onClick={() => {
+                const next = new Set(selectedSomeSurahs);
+                if (isSelected) next.delete(surah.number);
+                else next.add(surah.number);
+                setSelectedSomeSurahs(next);
+              }}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                isSelected
+                  ? "border-emerald-500 bg-emerald-500 text-white"
+                  : "border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:border-zinc-500"
+              }`}
+            >
+              {surah.nameSimple}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mb-6 grid grid-cols-2 gap-2">
+        {TIME_OPTIONS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => setLastRevised(option.value)}
+            className={`rounded-lg border p-2 text-center text-xs font-medium transition-colors ${
+              lastRevised === option.value
+                ? "border-zinc-500 bg-zinc-700 text-white"
+                : "border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:bg-zinc-800"
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-3">
+        <Button
+          className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
+          onClick={handleAuthenticatedEmptyStepTwoComplete}
+        >
+          Continue
+        </Button>
+        <button
+          type="button"
+          onClick={completeOnboarding}
+          className="block w-full text-sm text-zinc-400 transition-colors hover:text-zinc-200"
+        >
+          Skip — I&apos;ll read on Quran.com
+        </button>
+      </div>
+    </motion.div>
+  );
+
+  const renderGuestStepOne = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="mx-auto max-w-md text-center"
+    >
+      <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
+        <BookOpen className="h-7 w-7" />
+      </div>
+      <h1 className="mb-3 text-2xl font-bold tracking-tight">
+        Track your Quran memorization
+      </h1>
+      <p className="mb-8 text-sm leading-relaxed text-zinc-400">
+        Connect your Quran.com account to get started. Your reading history syncs
+        automatically.
       </p>
 
       <Button
-        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-5 text-base gap-2 mb-4"
-        onClick={() => { window.location.href = "/api/auth/login"; }}
+        className="mb-4 w-full gap-2 bg-emerald-500 py-5 text-base text-white hover:bg-emerald-600"
+        onClick={() => {
+          window.location.href = "/api/auth/login";
+        }}
       >
-        <LogIn className="w-4 h-4" />
+        <LogIn className="h-4 w-4" />
         Sign in with Quran.com
       </Button>
 
-      <div className="flex items-center gap-3 my-4">
-        <div className="flex-1 h-px bg-zinc-800" />
+      <div className="my-4 flex items-center gap-3">
+        <div className="h-px flex-1 bg-zinc-800" />
         <span className="text-xs text-zinc-600">or</span>
-        <div className="flex-1 h-px bg-zinc-800" />
+        <div className="h-px flex-1 bg-zinc-800" />
       </div>
 
       <button
+        type="button"
         onClick={() => setStep(2)}
-        className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors block w-full"
+        className="block w-full text-sm text-zinc-400 transition-colors hover:text-zinc-200"
       >
         Continue without account
-        <span className="block text-xs text-zinc-600 mt-1">Use demo data — sign in later to sync real progress</span>
+        <span className="mt-1 block text-xs text-zinc-600">
+          Use sample data now — sign in later to sync real progress
+        </span>
       </button>
 
       <div className="mt-8 flex items-center justify-center gap-1.5 text-xs text-zinc-600">
-        <Shield className="w-3 h-3" />
+        <Shield className="h-3 w-3" />
         We only read your reading history. We never post without your action.
       </div>
     </motion.div>
   );
 
-  const renderStep2AuthFound = () => (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto text-center">
-      <div className="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-        <Check className="w-7 h-7 text-emerald-500" />
+  const renderGuestStepTwo = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mx-auto max-w-md"
+    >
+      <div className="mb-6 text-center">
+        <h1 className="mb-2 text-xl font-bold tracking-tight">What brings you here?</h1>
+        <p className="text-sm text-zinc-400">
+          Quran Recall works whether you&apos;re memorizing your first surah or
+          maintaining a full hifdh.
+        </p>
       </div>
-      <h1 className="text-2xl font-bold tracking-tight mb-2">Welcome back{firstName ? `, ${firstName}` : ""}!</h1>
-      <p className="text-zinc-400 text-sm mb-8">
-        We found <span className="text-emerald-400 font-semibold">{sessionCount} ayahs</span> in your reading history. Your heatmap is ready.
-      </p>
-      <Button
-        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-5 text-base gap-2"
-        onClick={() => {
-          localStorage.setItem("hifdh_onboarded", "true");
-          onComplete();
-        }}
-      >
-        Start tracking <ChevronRight className="w-4 h-4" />
-      </Button>
-    </motion.div>
-  );
 
-  const renderStep2NoHistory = () => (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto text-center">
-      <h1 className="text-xl font-bold tracking-tight mb-2">Welcome{firstName ? `, ${firstName}` : ""}!</h1>
-      <p className="text-zinc-400 text-sm mb-6">You haven&apos;t read on Quran.com yet — let&apos;s set up your starting point.</p>
-      <div className="space-y-3 text-left">
-        {[
-          { id: "start", icon: Sprout, title: "I want to start memorizing", desc: "I haven't memorized much yet but want to start" },
-          { id: "some", icon: BookOpen, title: "I've memorized some surahs", desc: "I know a few surahs and want to track my revision" },
-          { id: "maintain", icon: Shield, title: "I'm maintaining my hifdh", desc: "I've memorized a lot and need help with revision" },
-        ].map((opt) => {
-          const Icon = opt.icon;
-          const isSelected = intent === opt.id;
-          return (
-            <div key={opt.id} onClick={() => setIntent(opt.id as Intent)}
-              className={`border rounded-xl p-4 cursor-pointer transition-all flex items-center gap-4 ${isSelected ? "border-emerald-500 bg-emerald-950/30" : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-500"}`}>
-              <div className={`p-2 rounded-full ${isSelected ? "bg-emerald-500/20 text-emerald-500" : "bg-zinc-700/50 text-zinc-400"}`}>
-                <Icon className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-medium">{opt.title}</h3>
-                <p className="text-xs text-zinc-400 mt-0.5">{opt.desc}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <Button className="w-full mt-6 bg-emerald-500 hover:bg-emerald-600 text-white" disabled={!intent} onClick={() => setStep(3)}>
-        Continue
-      </Button>
-    </motion.div>
-  );
-
-  const renderStep2Manual = () => (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto">
-      <div className="text-center mb-6">
-        <h1 className="text-xl font-bold tracking-tight mb-2">What brings you here?</h1>
-        <p className="text-zinc-400 text-sm">Hifdhometer works for everyone — whether you&apos;re memorizing your first surah or maintaining a full hifdh.</p>
-      </div>
       <div className="space-y-3">
         {[
-          { id: "start", icon: Sprout, title: "I want to start memorizing", desc: "I haven't memorized much yet but want to start" },
-          { id: "some", icon: BookOpen, title: "I've memorized some surahs", desc: "I know a few surahs and want to track my revision" },
-          { id: "maintain", icon: Shield, title: "I'm maintaining my hifdh", desc: "I've memorized a lot and need help with revision" },
-        ].map((opt) => {
-          const Icon = opt.icon;
-          const isSelected = intent === opt.id;
+          {
+            id: "start",
+            icon: Sprout,
+            title: "I want to start memorizing",
+            desc: "I haven't memorized much yet but want to start",
+          },
+          {
+            id: "some",
+            icon: BookOpen,
+            title: "I've memorized some surahs",
+            desc: "I know a few surahs and want to track my revision",
+          },
+          {
+            id: "maintain",
+            icon: Shield,
+            title: "I'm maintaining my hifdh",
+            desc: "I've memorized a lot and need help with revision",
+          },
+        ].map((option) => {
+          const Icon = option.icon;
+          const isSelected = intent === option.id;
+
           return (
-            <div key={opt.id} onClick={() => setIntent(opt.id as Intent)}
-              className={`border rounded-xl p-4 cursor-pointer transition-all flex items-center gap-4 ${isSelected ? "border-emerald-500 bg-emerald-950/30" : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-500"}`}>
-              <div className={`p-2 rounded-full ${isSelected ? "bg-emerald-500/20 text-emerald-500" : "bg-zinc-700/50 text-zinc-400"}`}>
-                <Icon className="w-5 h-5" />
+            <div
+              key={option.id}
+              onClick={() => setIntent(option.id as Intent)}
+              className={`flex cursor-pointer items-center gap-4 rounded-xl border p-4 transition-all ${
+                isSelected
+                  ? "border-emerald-500 bg-emerald-950/30"
+                  : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-500"
+              }`}
+            >
+              <div
+                className={`rounded-full p-2 ${
+                  isSelected
+                    ? "bg-emerald-500/20 text-emerald-500"
+                    : "bg-zinc-700/50 text-zinc-400"
+                }`}
+              >
+                <Icon className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-medium">{opt.title}</h3>
-                <p className="text-xs text-zinc-400 mt-0.5">{opt.desc}</p>
+                <h3 className="font-medium">{option.title}</h3>
+                <p className="mt-0.5 text-xs text-zinc-400">{option.desc}</p>
               </div>
             </div>
           );
         })}
       </div>
-      <Button className="w-full mt-8 bg-emerald-500 hover:bg-emerald-600 text-white" disabled={!intent} onClick={() => setStep(3)}>
+
+      <Button
+        className="mt-8 w-full bg-emerald-500 text-white hover:bg-emerald-600"
+        disabled={!intent}
+        onClick={() => setStep(3)}
+      >
         Continue
       </Button>
     </motion.div>
   );
 
-  const renderStep3Surah = () => (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="max-w-md mx-auto">
-      <div className="text-center mb-6">
-        <h2 className="text-xl font-bold tracking-tight mb-2">Which surahs are you memorizing?</h2>
-        <p className="text-zinc-400 text-sm">Select the surahs you want to track. As you read on Quran.com, your progress updates automatically.</p>
+  const renderGuestStepThree = () => (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="mx-auto max-w-md"
+    >
+      <div className="mb-6 text-center">
+        <h2 className="mb-2 text-xl font-bold tracking-tight">
+          Which surahs are you memorizing?
+        </h2>
+        <p className="text-sm text-zinc-400">
+          Select the surahs you want to track. As you read on Quran.com, your
+          progress updates automatically.
+        </p>
       </div>
-      {intent === "start" && (
+
+      {intent === "start" ? (
         <div className="flex flex-col gap-2">
-          {BEGINNER_SURAHS.map(surah => {
+          {BEGINNER_SURAHS.map((surah) => {
             const isSelected = selectedStartSurah === surah.number;
+
             return (
-              <div key={surah.number} onClick={() => setSelectedStartSurah(surah.number)}
-                className={`border rounded-xl p-3 cursor-pointer transition-all flex items-center justify-between ${isSelected ? "border-emerald-500 bg-emerald-950/30" : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-500"}`}>
+              <div
+                key={surah.number}
+                onClick={() => setSelectedStartSurah(surah.number)}
+                className={`flex cursor-pointer items-center justify-between rounded-xl border p-3 transition-all ${
+                  isSelected
+                    ? "border-emerald-500 bg-emerald-950/30"
+                    : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-500"
+                }`}
+              >
                 <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-zinc-700 flex items-center justify-center text-[10px] font-medium">{surah.number}</span>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-700 text-[10px] font-medium">
+                    {surah.number}
+                  </span>
                   <div>
-                    <h4 className="font-medium text-sm">{surah.nameSimple}</h4>
+                    <h4 className="text-sm font-medium">{surah.nameSimple}</h4>
                     <p className="text-xs text-zinc-400">{surah.translatedName}</p>
                   </div>
                 </div>
@@ -241,93 +423,151 @@ export function OnboardingFlow({ onComplete, isAuthenticated, firstName, session
               </div>
             );
           })}
+
           <AnimatePresence>
-            {selectedStartSurah && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-4">
-                <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white" onClick={handleComplete}>
-                  Start tracking <ChevronRight className="w-4 h-4 ml-1" />
+            {selectedStartSurah ? (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="mt-4"
+              >
+                <Button
+                  className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
+                  onClick={handleComplete}
+                >
+                  Start tracking
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
-      )}
-      {intent === "some" && (
+      ) : null}
+
+      {intent === "some" ? (
         <div>
-          <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1 mb-4">
-            {JUZ_AMMA_SURAHS.map(surah => {
-              const isSel = selectedSomeSurahs.has(surah.number);
+          <div className="mb-4 flex max-h-48 flex-wrap gap-2 overflow-y-auto p-1">
+            {JUZ_AMMA_SURAHS.map((surah) => {
+              const isSelected = selectedSomeSurahs.has(surah.number);
+
               return (
-                <button key={surah.number}
-                  onClick={() => { const s = new Set(selectedSomeSurahs); isSel ? s.delete(surah.number) : s.add(surah.number); setSelectedSomeSurahs(s); }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${isSel ? "bg-emerald-500 text-white border-emerald-500" : "bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:border-zinc-500"}`}>
+                <button
+                  key={surah.number}
+                  type="button"
+                  onClick={() => {
+                    const next = new Set(selectedSomeSurahs);
+                    if (isSelected) next.delete(surah.number);
+                    else next.add(surah.number);
+                    setSelectedSomeSurahs(next);
+                  }}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    isSelected
+                      ? "border-emerald-500 bg-emerald-500 text-white"
+                      : "border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:border-zinc-500"
+                  }`}
+                >
                   {surah.nameSimple}
                 </button>
               );
             })}
           </div>
           <div className="mb-4 grid grid-cols-2 gap-2">
-            {TIME_OPTIONS.map(opt => (
-              <button key={opt.value} onClick={() => setLastRevised(opt.value)}
-                className={`p-2 rounded-lg text-xs font-medium border text-center transition-colors ${lastRevised === opt.value ? "bg-zinc-700 text-white border-zinc-500" : "bg-zinc-800/30 border-zinc-800 text-zinc-400 hover:bg-zinc-800"}`}>
-                {opt.label}
+            {TIME_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setLastRevised(option.value)}
+                className={`rounded-lg border p-2 text-center text-xs font-medium transition-colors ${
+                  lastRevised === option.value
+                    ? "border-zinc-500 bg-zinc-700 text-white"
+                    : "border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:bg-zinc-800"
+                }`}
+              >
+                {option.label}
               </button>
             ))}
           </div>
-          <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white"
-            disabled={selectedSomeSurahs.size === 0 && !includesAyatulKursi}
-            onClick={handleComplete}>
-            Start tracking <ChevronRight className="w-4 h-4 ml-1" />
+          <Button
+            className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
+            disabled={selectedSomeSurahs.size === 0}
+            onClick={handleComplete}
+          >
+            Start tracking
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-      )}
-      {intent === "maintain" && (
+      ) : null}
+
+      {intent === "maintain" ? (
         <div>
-          <div className="space-y-3 mb-6">
-            {[{ id: "juz_amma", title: "Juz Amma (Juz 30)" }, { id: "multi_juz", title: "Multiple juz" }, { id: "full", title: "Full Quran (Alhamdulillah)" }].map(opt => (
-              <div key={opt.id}
-                onClick={() => { setMaintainLevel(opt.id as MaintainLevel); if (opt.id === "multi_juz") setSelectedJuz(new Set([30, 29, 28])); }}
-                className={`border rounded-xl p-4 cursor-pointer transition-all text-center font-medium ${maintainLevel === opt.id ? "border-emerald-500 bg-emerald-950/30 text-emerald-400" : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-500"}`}>
-                {opt.title}
+          <div className="mb-6 space-y-3">
+            {[
+              { id: "juz_amma", title: "Juz Amma (Juz 30)" },
+              { id: "multi_juz", title: "Multiple juz" },
+              { id: "full", title: "Full Quran (Alhamdulillah)" },
+            ].map((option) => (
+              <div
+                key={option.id}
+                onClick={() => setMaintainLevel(option.id as MaintainLevel)}
+                className={`cursor-pointer rounded-xl border p-4 text-center font-medium transition-all ${
+                  maintainLevel === option.id
+                    ? "border-emerald-500 bg-emerald-950/30 text-emerald-400"
+                    : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-500"
+                }`}
+              >
+                {option.title}
               </div>
             ))}
           </div>
-          {maintainLevel && (
+
+          {maintainLevel ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <div className="grid grid-cols-2 gap-2 mb-6">
-                {TIME_OPTIONS.map(opt => (
-                  <button key={opt.value} onClick={() => setLastRevised(opt.value)}
-                    className={`p-2 rounded-lg text-xs font-medium border text-center transition-colors ${lastRevised === opt.value ? "bg-zinc-700 text-white border-zinc-500" : "bg-zinc-800/30 border-zinc-800 text-zinc-400 hover:bg-zinc-800"}`}>
-                    {opt.label}
+              <div className="mb-6 grid grid-cols-2 gap-2">
+                {TIME_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setLastRevised(option.value)}
+                    className={`rounded-lg border p-2 text-center text-xs font-medium transition-colors ${
+                      lastRevised === option.value
+                        ? "border-zinc-500 bg-zinc-700 text-white"
+                        : "border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:bg-zinc-800"
+                    }`}
+                  >
+                    {option.label}
                   </button>
                 ))}
               </div>
-              <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white" onClick={handleComplete}>
-                Start tracking <ChevronRight className="w-4 h-4 ml-1" />
+              <Button
+                className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
+                onClick={handleComplete}
+              >
+                Start tracking
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </motion.div>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
     </motion.div>
   );
 
   const renderCurrentStep = () => {
-    if (step === 1) return renderStep1Connect();
-    if (step === 2) {
-      if (isAuthenticated && sessionCount > 0) return renderStep2AuthFound();
-      if (isAuthenticated && sessionCount === 0) return renderStep2NoHistory();
-      return renderStep2Manual();
+    if (isAuthenticatedEmpty) {
+      if (step === 1) return renderAuthStepOne();
+      return renderAuthStepTwo();
     }
-    if (step === 3) return renderStep3Surah();
-    return null;
+
+    if (step === 1) return renderGuestStepOne();
+    if (step === 2) return renderGuestStepTwo();
+    return renderGuestStepThree();
   };
 
   return (
-    <div className="fixed inset-0 bg-background/95 backdrop-blur-md z-50 overflow-y-auto flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-background/95 p-4 backdrop-blur-md">
       <div className="w-full">
         <AnimatePresence mode="wait">
-          <motion.div key={step}>
+          <motion.div key={`${isAuthenticatedEmpty ? "auth-empty" : "guest"}-${step}`}>
             {renderCurrentStep()}
           </motion.div>
         </AnimatePresence>

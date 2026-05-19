@@ -16,7 +16,7 @@ import type {
 } from "@/types/hifdh";
 import type { UserStreak } from "@/lib/userApi";
 
-type DataSource = "api" | "local";
+type DataSource = "api" | "local" | "authenticated-empty";
 
 type UseHifdhResult = {
   surahGroups: SurahGroup[];
@@ -82,16 +82,22 @@ export function useHifdh(): UseHifdhResult {
 
         if (!isMounted) return;
 
+        console.log("Auth status:", meData.isAuthenticated);
+
         if (meData.isAuthenticated) {
           setIsAuthenticated(true);
 
+          console.log("Fetching sessions...");
           const sessionsRes = await fetch("/api/user/sessions");
+          console.log("Sessions response:", sessionsRes.status);
+
           if (!sessionsRes.ok) throw new Error("sessions fetch failed");
 
           const { sessions, streaks: fetchedStreaks } = await sessionsRes.json() as {
             sessions: unknown[];
             streaks: UserStreak;
           };
+          console.log("Sessions data:", { sessions, streaks: fetchedStreaks });
 
           if (!isMounted) return;
 
@@ -108,7 +114,7 @@ export function useHifdh(): UseHifdhResult {
             setDataSource("api");
           } else {
             setData(hifdhService.getDashboardData());
-            setDataSource("local");
+            setDataSource("authenticated-empty");
           }
         } else {
           setData(hifdhService.getDashboardData());

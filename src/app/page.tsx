@@ -81,7 +81,7 @@ const featureCards = [
 
 function LandingHeader() {
   const { resolvedTheme, setTheme } = useTheme();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, logout } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -89,8 +89,6 @@ function LandingHeader() {
   }, []);
 
   const isDark = mounted && resolvedTheme === "dark";
-  const showOpenApp = mounted && !isLoading && isAuthenticated;
-
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/72 backdrop-blur-xl">
       <div className="container flex h-20 items-center justify-between gap-6">
@@ -98,7 +96,7 @@ function LandingHeader() {
           href="/"
           className="font-display text-3xl font-medium tracking-tight text-primary"
         >
-          Hifdh Health
+          Quran Recall
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -124,7 +122,25 @@ function LandingHeader() {
             {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
 
-          {showOpenApp ? (
+          {mounted && !isLoading && isAuthenticated ? (
+            <>
+              <Button
+                asChild
+                className="rounded-full bg-primary px-6 text-primary-foreground shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-primary/90"
+              >
+                <Link href="/dashboard">Go to dashboard</Link>
+              </Button>
+              <button
+                type="button"
+                onClick={logout}
+                className="hidden text-sm text-zinc-500 transition-colors hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100 md:inline-flex"
+              >
+                Sign out
+              </button>
+            </>
+          ) : null}
+
+          {mounted && !isLoading && !isAuthenticated ? (
             <>
               <Button
                 asChild
@@ -384,7 +400,7 @@ export default function LandingPage() {
             Begin your journey with peace and clarity.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-            Join the next iteration of Hifdh Health as the memorization workflow,
+            Join the next iteration of Quran Recall as the memorization workflow,
             ayah health tracking, and focus mode continue to mature.
           </p>
 
@@ -406,7 +422,7 @@ export default function LandingPage() {
         <div className="container flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="font-display text-2xl font-medium text-primary">
-              Hifdh Health
+              Quran Recall
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
               A sanctuary for your Quranic journey.

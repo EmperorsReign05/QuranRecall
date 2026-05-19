@@ -44,7 +44,7 @@ export function TopNavbar({ compact = false }: { compact?: boolean }) {
             href="/"
             className="font-serif text-2xl font-semibold tracking-normal text-foreground hover:opacity-90 transition-opacity"
           >
-            Hifdh Health
+            Quran Recall
           </Link>
           
           <div className="hidden flex-1 justify-center md:flex">
@@ -114,7 +114,7 @@ export function TopNavbar({ compact = false }: { compact?: boolean }) {
               className="fixed inset-y-0 right-0 z-50 w-full max-w-xs bg-zinc-950 border-l border-zinc-800 p-6 flex flex-col shadow-2xl lg:hidden"
             >
               <div className="flex items-center justify-between mb-8">
-                <span className="font-serif text-xl font-semibold">Hifdh Health</span>
+                <span className="font-serif text-xl font-semibold">Quran Recall</span>
                 <Button variant="ghost" size="icon" onClick={closeMenu} className="text-zinc-400 hover:text-zinc-100">
                   <X className="h-5 w-5" />
                 </Button>

@@ -1,39 +1,97 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-async function tryPostReadingSession(
+type ReadingSessionAttempt = {
+  endpoint: string;
+  status: number;
+  ok: boolean;
+  bodyText: string;
+};
+
+async function postToEndpoint(
+  endpoint: string,
   accessToken: string,
   clientId: string,
-  userApiBase: string,
-  verseKey: string
-): Promise<Response> {
-  const paths = [
-    `${userApiBase}/auth/v1/reading-sessions`,
-    `${userApiBase}/api/v1/reading-sessions`,
-    `${userApiBase}/v1/reading-sessions`,
-  ];
+  verseKey: string,
+): Promise<ReadingSessionAttempt> {
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "x-auth-token": accessToken,
+        "x-client-id": clientId,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ verse_key: verseKey }),
+      cache: "no-store",
+    });
 
-  const headers = {
-    "x-auth-token": accessToken,
-    "x-client-id": clientId,
-    "Content-Type": "application/json",
-  };
-  const body = JSON.stringify({ verse_key: verseKey });
+    const bodyText = await response.clone().text();
+    console.log(`Reading session attempt [${endpoint}]`, response.status, bodyText);
 
-  for (const url of paths) {
-    const res = await fetch(url, { method: "POST", headers, body });
-    const text = await res.clone().text();
-    console.log(`Reading session [${url}]:`, res.status, text);
-    if (res.ok) return res;
+    return {
+      endpoint,
+      status: response.status,
+      ok: response.ok,
+      bodyText,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Reading session endpoint error [${endpoint}]`, error);
+    return {
+      endpoint,
+      status: 500,
+      ok: false,
+      bodyText: message,
+    };
+  }
+}
+
+async function tryReadingSessionEndpoints(
+  accessToken: string,
+  clientId: string,
+  verseKey: string,
+): Promise<{
+  success: boolean;
+  workingAttempt: ReadingSessionAttempt;
+  attempts: ReadingSessionAttempt[];
+}> {
+  const envBase = process.env.QURAN_USER_API_BASE;
+  const endpoints = [
+    envBase ? `${envBase}/auth/v1/reading-sessions` : null,
+    "https://apis-prelive.quran.foundation/auth/v1/reading-sessions",
+    "https://apis.quran.foundation/auth/v1/reading-sessions",
+  ].filter((endpoint): endpoint is string => Boolean(endpoint));
+
+  const attempts: ReadingSessionAttempt[] = [];
+
+  for (const endpoint of endpoints) {
+    const attempt = await postToEndpoint(endpoint, accessToken, clientId, verseKey);
+    attempts.push(attempt);
+    if (attempt.ok) {
+      return { success: true, workingAttempt: attempt, attempts };
+    }
   }
 
-  return paths.reduce<Promise<Response>>(
-    (_, url) => fetch(url, { method: "POST", headers, body }),
-    Promise.resolve(new Response("", { status: 404 }))
-  );
+  return {
+    success: false,
+    workingAttempt:
+      attempts[attempts.length - 1] ??
+      {
+        endpoint: "none",
+        status: 500,
+        ok: false,
+        bodyText: "No endpoint attempts were made",
+      },
+    attempts,
+  };
 }
 
 export async function POST(request: Request) {
+  console.log("Reading session route hit");
+  console.log("Method:", request.method);
+  console.log("User API base:", process.env.QURAN_USER_API_BASE);
+
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("qf_session");
@@ -42,57 +100,77 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const session = JSON.parse(sessionCookie.value);
-    const { verseKey } = await request.json();
+    const session = JSON.parse(sessionCookie.value) as { accessToken?: string };
+    const { verseKey } = (await request.json()) as { verseKey?: string };
 
-    const clientId = process.env.QURAN_USER_CLIENT_ID!;
-    const userApiBase = process.env.QURAN_USER_API_BASE!;
+    if (!session.accessToken || !verseKey) {
+      return NextResponse.json(
+        { error: "Missing access token or verse key" },
+        { status: 400 },
+      );
+    }
 
-    let response = await tryPostReadingSession(
+    const clientId = process.env.QURAN_USER_CLIENT_ID;
+    if (!clientId) {
+      return NextResponse.json(
+        { error: "Missing QURAN_USER_CLIENT_ID" },
+        { status: 500 },
+      );
+    }
+
+    let result = await tryReadingSessionEndpoints(
       session.accessToken,
       clientId,
-      userApiBase,
-      verseKey
+      verseKey,
     );
 
-    if (response.status === 401) {
-      const refreshRes = await fetch(new URL("/api/auth/refresh", request.url), {
+    if (!result.success && result.workingAttempt.status === 401) {
+      const refreshResponse = await fetch(new URL("/api/auth/refresh", request.url), {
         method: "POST",
         headers: { cookie: request.headers.get("cookie") || "" },
       });
 
-      if (refreshRes.ok) {
-        const newCookieStore = await cookies();
-        const newSessionStr = newCookieStore.get("qf_session");
-        if (newSessionStr) {
-          const newSession = JSON.parse(newSessionStr.value);
-          response = await tryPostReadingSession(
-            newSession.accessToken,
-            clientId,
-            userApiBase,
-            verseKey
-          );
+      if (refreshResponse.ok) {
+        const refreshedCookieStore = await cookies();
+        const refreshedSessionCookie = refreshedCookieStore.get("qf_session");
+
+        if (refreshedSessionCookie) {
+          const refreshedSession = JSON.parse(refreshedSessionCookie.value) as {
+            accessToken?: string;
+          };
+
+          if (refreshedSession.accessToken) {
+            result = await tryReadingSessionEndpoints(
+              refreshedSession.accessToken,
+              clientId,
+              verseKey,
+            );
+          }
         }
       }
     }
 
-    if (!response.ok) {
+    if (!result.success) {
       return NextResponse.json(
-        { error: "Failed to record session" },
-        { status: response.status }
+        {
+          error: "Failed to record session",
+          endpoint: result.workingAttempt.endpoint,
+          status: result.workingAttempt.status,
+          details: result.workingAttempt.bodyText,
+          attempts: result.attempts,
+        },
+        { status: result.workingAttempt.status || 500 },
       );
     }
 
-    const text = await response.text();
-    let data: unknown;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { message: text };
-    }
-    return NextResponse.json(data);
+    return NextResponse.json({
+      success: true,
+      endpoint: result.workingAttempt.endpoint,
+      status: result.workingAttempt.status,
+    });
   } catch (error) {
     console.error("Reading session error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

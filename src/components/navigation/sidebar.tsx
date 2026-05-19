@@ -28,7 +28,7 @@ export function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-72 border-r bg-card lg:block">
       <div className="flex h-full flex-col p-5">
         <Link href="/" className="font-serif text-2xl font-semibold tracking-normal">
-          Hifdh Health
+          Quran Recall
         </Link>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Memorization health and revision planning.
@@ -65,8 +65,16 @@ export function Sidebar() {
         <div className="mt-auto rounded-lg border bg-background p-4">
           <p className="text-sm font-medium">Tip</p>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Read on <a href="https://quran.com" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline">Quran.com</a> and your heatmap updates automatically.
+            Read on Quran.com and your heatmap updates automatically.
           </p>
+          <a
+            href="https://quran.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex text-sm font-medium text-emerald-500 hover:underline"
+          >
+            quran.com →
+          </a>
         </div>
       </div>
     </aside>

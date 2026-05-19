@@ -255,7 +255,7 @@ export function RevisionQueue({ items, onMarkRevised, onAyahClick }: RevisionQue
             <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-3" strokeWidth={1.5} />
             <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-300 mb-1">Your hifdh is in good health.</h3>
             <p className="text-sm text-zinc-500 max-w-[200px]">
-              No revisions due today. Check back tomorrow.
+              Your hifdh is healthy — nothing due today.
             </p>
           </div>
         ) : (

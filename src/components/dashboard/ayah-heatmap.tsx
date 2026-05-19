@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { AyahHeatmapPlaceholder } from "@/components/dashboard/ayah-heatmap-placeholder";
 import type { HifdhStats, SurahGroup, VerseKey } from "@/types/hifdh";
 
 interface AyahHeatmapProps {
@@ -12,24 +11,69 @@ interface AyahHeatmapProps {
   isLoading: boolean;
   onSelectAyah?: (verseKey: VerseKey) => void;
   selectedAyah?: VerseKey | null;
+  dataSource?: "api" | "local" | "authenticated-empty";
+}
+
+function SkeletonHeatmap() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      {[8, 3, 12, 6, 4, 9].map((count, index) => (
+        <div key={index} className="flex items-start gap-3">
+          <div className="w-[120px] flex-shrink-0 space-y-1">
+            <div className="h-3 w-20 rounded bg-zinc-200 dark:bg-zinc-700" />
+            <div className="h-3 w-14 rounded bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+          <div className="flex flex-wrap gap-[3px]">
+            {Array.from({ length: count }).map((_, squareIndex) => (
+              <div
+                key={squareIndex}
+                className="h-3 w-3 rounded-sm bg-zinc-200 dark:bg-zinc-700"
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function AyahHeatmap({
   surahGroups,
   stats,
   isLoading,
+  dataSource,
   onSelectAyah,
   selectedAyah,
 }: AyahHeatmapProps) {
-  if (isLoading || surahGroups.length === 0) {
-    return <AyahHeatmapPlaceholder />;
+  if (isLoading) {
+    return (
+      <Card className="flex h-full flex-col">
+        <CardHeader className="border-b pb-3">
+          <CardTitle className="text-lg font-semibold">Memorization Heatmap</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 pt-5">
+          <SkeletonHeatmap />
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
     <Card className="flex flex-col h-full">
       <CardHeader className="pb-3 border-b">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">Memorization Heatmap</CardTitle>
+          <div className="flex items-center gap-3">
+            <CardTitle className="text-lg font-semibold">Memorization Heatmap</CardTitle>
+            {dataSource === "api" ? (
+              <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                ● Live data from Quran.com
+              </span>
+            ) : (
+              <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                ○ Sample data
+              </span>
+            )}
+          </div>
           {stats && (
             <div className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
               Overall health: {stats.overallHealthScore}

@@ -1,5 +1,5 @@
 {
-  "name": "hifdh-health",
+  "name": "quran-recall",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -30,6 +30,7 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.15.11",
     "@next/swc-wasm-nodejs": "^15.5.18",
     "@types/node": "^22.19.0",
     "@types/react": "^19.2.7",

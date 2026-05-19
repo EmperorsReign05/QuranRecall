@@ -20,7 +20,7 @@ export function RevisionQueuePlaceholder() {
       </CardHeader>
       <CardContent>
         <div className="flex min-h-64 flex-col items-center justify-center rounded-lg border border-dashed bg-secondary/40 p-8 text-center">
-          <p className="text-lg font-semibold">No revisions queued yet</p>
+          <p className="text-lg font-semibold">Your hifdh is healthy — nothing due today.</p>
           <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
             This space is ready for spaced revision items once progress tracking
             is connected.

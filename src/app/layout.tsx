@@ -17,7 +17,7 @@ const ebGaramond = EB_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Hifdh Health",
+  title: "Quran Recall",
   description: "A calm memorization health dashboard for Quran revision.",
 };
 

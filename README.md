@@ -1,4 +1,4 @@
-# Hifdh Health
+# Quran Recall
 
 A modern Next.js 15 app foundation for memorization health tracking.
 
