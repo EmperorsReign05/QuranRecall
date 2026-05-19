@@ -82,14 +82,10 @@ export function useHifdh(): UseHifdhResult {
 
         if (!isMounted) return;
 
-        console.log("Auth status:", meData.isAuthenticated);
-
         if (meData.isAuthenticated) {
           setIsAuthenticated(true);
 
-          console.log("Fetching sessions...");
           const sessionsRes = await fetch("/api/user/sessions");
-          console.log("Sessions response:", sessionsRes.status);
 
           if (!sessionsRes.ok) throw new Error("sessions fetch failed");
 
@@ -97,7 +93,6 @@ export function useHifdh(): UseHifdhResult {
             sessions: unknown[];
             streaks: UserStreak;
           };
-          console.log("Sessions data:", { sessions, streaks: fetchedStreaks });
 
           if (!isMounted) return;
 

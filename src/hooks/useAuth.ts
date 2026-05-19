@@ -9,7 +9,15 @@ export interface QFUser {
   lastName: string;
 }
 
-export function useAuth() {
+export interface UseAuthResult {
+  user: QFUser | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: () => void;
+  logout: () => Promise<void>;
+}
+
+export function useAuth(): UseAuthResult {
   const [user, setUser] = useState<QFUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

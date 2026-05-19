@@ -32,8 +32,6 @@ async function fetchReadingSessions(
   });
 
   const bodyText = await response.text();
-  console.log("Reading sessions raw status:", response.status);
-  console.log("Reading sessions raw body:", bodyText);
 
   if (!response.ok) {
     return {
@@ -80,8 +78,6 @@ async function fetchStreaks(accessToken: string): Promise<UserStreak> {
     });
 
     const bodyText = await response.text();
-    console.log("Streaks raw status:", response.status);
-    console.log("Streaks raw body:", bodyText);
 
     if (!response.ok) {
       return { current_streak: 0, longest_streak: 0 };
@@ -111,26 +107,15 @@ async function fetchStreaks(accessToken: string): Promise<UserStreak> {
 }
 
 export async function GET() {
-  console.log("Sessions route hit");
-
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("qf_session");
-
-    console.log("Cookie present:", !!sessionCookie);
-    console.log("Env check:", {
-      hasUserClientId: !!process.env.QURAN_USER_CLIENT_ID,
-      hasUserSecret: !!process.env.QURAN_USER_CLIENT_SECRET,
-      hasUserAuthUrl: !!process.env.QURAN_USER_AUTH_URL,
-      hasUserApiBase: !!process.env.QURAN_USER_API_BASE,
-    });
 
     if (!sessionCookie) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const session = JSON.parse(sessionCookie.value) as { accessToken?: string };
-    console.log("Access token present:", !!session?.accessToken);
 
     if (!session.accessToken) {
       return NextResponse.json({ error: "Missing access token" }, { status: 401 });

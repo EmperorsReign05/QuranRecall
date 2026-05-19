@@ -24,8 +24,7 @@ export async function POST(request: Request) {
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     const tokenUrl = `${process.env.QURAN_USER_AUTH_URL}/oauth2/token`;
     
-    console.log('Exchanging code at:', tokenUrl);
-    console.log('Using client ID:', process.env.QURAN_USER_CLIENT_ID);
+    // Exchanging code at token URL (debug logs removed)
 
     const tokenRes = await fetch(tokenUrl, {
       method: 'POST',
@@ -58,8 +57,6 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log('Token data keys:', Object.keys(tokenData));
-    console.log('ID token payload:', idTokenPayload);
 
     const user = {
       sub: idTokenPayload.sub ?? tokenData.sub ?? 'unknown',

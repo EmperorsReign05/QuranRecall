@@ -25,9 +25,7 @@ async function postToEndpoint(
       body: JSON.stringify({ verse_key: verseKey }),
       cache: "no-store",
     });
-
-    const bodyText = await response.clone().text();
-    console.log(`Reading session attempt [${endpoint}]`, response.status, bodyText);
+    const bodyText = await response.text();
 
     return {
       endpoint,
@@ -88,9 +86,7 @@ async function tryReadingSessionEndpoints(
 }
 
 export async function POST(request: Request) {
-  console.log("Reading session route hit");
-  console.log("Method:", request.method);
-  console.log("User API base:", process.env.QURAN_USER_API_BASE);
+
 
   try {
     const cookieStore = await cookies();

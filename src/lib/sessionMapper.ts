@@ -66,7 +66,6 @@ export function mapSessionsToEngagements(
     });
   });
 
-  console.log("Mapped engagements count:", engagements.length);
   return engagements;
 }
 

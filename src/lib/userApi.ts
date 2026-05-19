@@ -40,10 +40,7 @@ export async function getUserReadingSessions(
       return [];
     }
     const json = await res.json();
-    console.log("Reading sessions response keys:", Object.keys(json));
     const sessions = (json.reading_sessions ?? json.data ?? json.edges?.map((e: {node: ReadingSession}) => e.node) ?? []) as ReadingSession[];
-    console.log("Reading sessions count:", sessions.length);
-    if (sessions.length > 0) console.log("First session sample:", JSON.stringify(sessions[0]));
     return sessions;
   } catch (e) {
     console.error("getUserReadingSessions error:", e);
@@ -64,7 +61,6 @@ export async function getUserActivityDays(
       return [];
     }
     const json = await res.json();
-    console.log("Activity days response keys:", Object.keys(json));
     return (json.activity_days ?? json.data ?? json.edges?.map((e: {node: ActivityDay}) => e.node) ?? []) as ActivityDay[];
   } catch (e) {
     console.error("getUserActivityDays error:", e);
@@ -86,7 +82,6 @@ export async function getUserStreaks(
       return fallback;
     }
     const json = await res.json();
-    console.log("Streaks response:", JSON.stringify(json).substring(0, 300));
     // API returns { data: [ { days, status, type, ... } ] }
     const data: Array<{ days?: number; status?: string; current_streak?: number; longest_streak?: number }> = Array.isArray(json.data) ? json.data : [];
     const activeStreak = data.find(s => s.status === 'ACTIVE') ?? data[0];
@@ -125,7 +120,6 @@ export async function postReadingSession(
         body: JSON.stringify({ verse_key: verseKey }),
       });
       const text = await res.text();
-      console.log(`postReadingSession [${url}]:`, res.status, text);
       if (res.ok) return true;
     } catch (e) {
       console.error(`postReadingSession [${url}] error:`, e);

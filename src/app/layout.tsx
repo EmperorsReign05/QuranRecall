@@ -18,7 +18,20 @@ const ebGaramond = EB_Garamond({
 
 export const metadata: Metadata = {
   title: "Quran Recall",
-  description: "A calm memorization health dashboard for Quran revision.",
+  description: "A calm, beautiful, and distraction-free memorization health dashboard for Quran revision.",
+  openGraph: {
+    title: "Quran Recall",
+    description: "A calm, beautiful, and distraction-free memorization health dashboard for Quran revision.",
+    url: "https://quranrecall.com",
+    siteName: "Quran Recall",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Quran Recall",
+    description: "A calm, beautiful, and distraction-free memorization health dashboard for Quran revision.",
+  },
 };
 
 export default function RootLayout({
