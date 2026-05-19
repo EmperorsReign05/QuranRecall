@@ -1,24 +1,14 @@
 "use client";
 
-import {
-  BarChart3,
-  BookMarked,
-  BookOpen,
-  CalendarDays,
-  Home,
-  Settings,
-} from "lucide-react";
+import { BookOpen, Home } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "Overview",       href: "/dashboard",  icon: Home },
-  { label: "Memorize",       href: "/memorize",   icon: BookOpen },
-  { label: "Ayah Health",    href: "/dashboard",  icon: BookMarked },
-  { label: "Revision Queue", href: "/dashboard",  icon: CalendarDays },
-  { label: "Insights",       href: "/dashboard",  icon: BarChart3 },
-  { label: "Settings",       href: "/dashboard",  icon: Settings },
+  { label: "Overview", href: "/dashboard", icon: Home },
+  { label: "Memorize", href: "/memorize", icon: BookOpen },
 ];
 
 export function Sidebar() {
@@ -35,11 +25,10 @@ export function Sidebar() {
         </p>
         <nav className="mt-8 space-y-1">
           {navItems.map((item) => {
-            const isActive = item.href === "/memorize"
-              ? pathname.startsWith("/memorize")
-              : item.href === "/dashboard" && item.label === "Overview"
-              ? pathname === "/dashboard"
-              : false;
+            const isActive =
+              item.href === "/memorize"
+                ? pathname.startsWith("/memorize")
+                : pathname === "/dashboard";
 
             return (
               <Link
@@ -47,16 +36,16 @@ export function Sidebar() {
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground",
-                  isActive && "bg-accent text-accent-foreground"
+                  isActive && "bg-accent text-accent-foreground",
                 )}
               >
                 <item.icon className="h-4 w-4" />
                 {item.label}
-                {item.label === "Memorize" && (
-                  <span className="ml-auto text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
+                {item.label === "Memorize" ? (
+                  <span className="ml-auto rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-500">
                     New
                   </span>
-                )}
+                ) : null}
               </Link>
             );
           })}

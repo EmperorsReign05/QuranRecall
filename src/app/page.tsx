@@ -22,9 +22,9 @@ import { cn } from "@/lib/utils";
 
 const navigation = [
   { label: "Dashboard", href: "/dashboard" },
-  { label: "Memorize", href: "/memorize" },
-  { label: "Methodology", href: "#methodology" },
-  { label: "Resources", href: "#resources" },
+  { label: "Memorize", href: "/dashboard" },
+  { label: "Methodology", href: "/#methodology" },
+  { label: "Resources", href: "https://quran.com", external: true },
 ];
 
 const sanctuaryPoints = [
@@ -104,6 +104,8 @@ function LandingHeader() {
             <Link
               key={item.label}
               href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noreferrer" : undefined}
               className="text-sm font-semibold tracking-[0.18em] text-muted-foreground transition-colors hover:text-primary"
             >
               {item.label}
@@ -353,7 +355,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="resources" className="bg-sanctuary-gradient py-20">
+      <section className="bg-sanctuary-gradient py-20">
         <div className="container">
           <MotionSection className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary/75">
@@ -391,31 +393,19 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="container py-20">
-        <MotionSection className="mx-auto max-w-4xl rounded-[2.5rem] border border-border/70 bg-card/75 px-6 py-12 text-center shadow-soft dark:bg-card/70 md:px-12">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary/75">
-            Early access
-          </p>
-          <h2 className="font-display mt-5 text-4xl font-medium md:text-5xl">
-            Begin your journey with peace and clarity.
-          </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-            Join the next iteration of Quran Recall as the memorization workflow,
-            ayah health tracking, and focus mode continue to mature.
-          </p>
-
-          <form className="mx-auto mt-10 flex max-w-2xl flex-col gap-3 rounded-[1.5rem] border border-border/70 bg-background/80 p-3 shadow-sm md:flex-row md:items-center md:rounded-full">
-            <input
-              suppressHydrationWarning
-              type="email"
-              placeholder="Enter your email"
-              className="h-14 flex-1 rounded-[1rem] border border-transparent bg-transparent px-5 text-base outline-none placeholder:text-muted-foreground/70 focus:border-border md:rounded-full"
-            />
-            <Button className="h-14 rounded-[1rem] px-7 text-base md:rounded-full">
-              Get early access
-            </Button>
-          </form>
-        </MotionSection>
+      <section className="py-16 text-center">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Built for the{" "}
+          <a
+            href="https://quran.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-teal-600 hover:underline"
+          >
+            Quran Foundation
+          </a>{" "}
+          Hackathon · 2025
+        </p>
       </section>
 
       <footer className="border-t border-border/60 bg-card/45">

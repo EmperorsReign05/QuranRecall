@@ -2,21 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BookOpen } from "lucide-react";
 
+import { AyahDetailPanel } from "@/components/dashboard/ayah-detail-panel";
 import { AyahHeatmap } from "@/components/dashboard/ayah-heatmap";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { StatCards } from "@/components/dashboard/stat-cards";
-import { AyahDetailPanel } from "@/components/dashboard/ayah-detail-panel";
-import { RevisionQueue } from "@/components/queue/RevisionQueue";
-import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { TrackSurahButton } from "@/components/dashboard/TrackSurahButton";
-import { useHifdh } from "@/hooks/useHifdh";
-import { useAuth } from "@/hooks/useAuth";
-import type { VerseKey } from "@/types/hifdh";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { RevisionQueue } from "@/components/queue/RevisionQueue";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useHifdh } from "@/hooks/useHifdh";
+import type { VerseKey } from "@/types/hifdh";
 
 export default function DashboardPage() {
   const {
@@ -32,12 +32,11 @@ export default function DashboardPage() {
   } = useHifdh();
   const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
   const [selectedAyahKey, setSelectedAyahKey] = useState<VerseKey | null>(null);
-  const router = useRouter();
-
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [sessionCount, setSessionCount] = useState(0);
   const [isClient, setIsClient] = useState(false);
   const [showWelcomeSync, setShowWelcomeSync] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     let syncTimeout: number | null = null;
@@ -50,15 +49,14 @@ export default function DashboardPage() {
       }
     }
 
-    // Wait for auth to resolve before checking onboarding
     if (isAuthLoading) return;
 
     if (!localStorage.getItem("hifdh_onboarded")) {
       if (isAuthenticated) {
         fetch("/api/user/sessions")
-          .then((r) => r.json())
-          .then((d: { sessions?: unknown[] }) => {
-            const count = d.sessions?.length ?? 0;
+          .then((response) => response.json())
+          .then((data: { sessions?: unknown[] }) => {
+            const count = data.sessions?.length ?? 0;
             setSessionCount(count);
 
             if (count > 0) {
@@ -101,7 +99,7 @@ export default function DashboardPage() {
 
   if (selectedAyahKey) {
     for (const group of surahGroups) {
-      const ayah = group.ayahs.find(a => a.verseKey === selectedAyahKey);
+      const ayah = group.ayahs.find((item) => item.verseKey === selectedAyahKey);
       if (ayah) {
         selectedAyah = ayah;
         surahName = group.surah.nameSimple;
@@ -113,11 +111,12 @@ export default function DashboardPage() {
 
   if (!isClient) return null;
 
-  const isTrulyNewUser = stats && stats.strongCount + stats.reviewCount + stats.weakCount === 0;
+  const isTrulyNewUser =
+    stats && stats.strongCount + stats.reviewCount + stats.weakCount === 0;
   const isAuthenticatedEmpty = dataSource === "authenticated-empty";
 
   return (
-    <div className="space-y-8 relative overflow-hidden">
+    <div className="relative space-y-8 overflow-hidden">
       <AnimatePresence>
         {showWelcomeSync ? (
           <motion.div
@@ -130,65 +129,80 @@ export default function DashboardPage() {
           </motion.div>
         ) : null}
       </AnimatePresence>
-      {showOnboarding && (
+
+      {showOnboarding ? (
         <OnboardingFlow
           onComplete={handleOnboardingComplete}
           isAuthenticated={isAuthenticated}
           firstName={user?.firstName}
           sessionCount={sessionCount}
         />
-      )}
-      <DashboardHeader />
+      ) : null}
+
+      <DashboardHeader
+        dataSource={dataSource}
+        totalTracked={stats?.totalTracked ?? 0}
+      />
+
       <StatCards
         totalTracked={stats?.totalTracked ?? 0}
         currentStreak={currentStreak}
         healthScore={stats?.overallHealthScore ?? 0}
+        revisionDue={revisionQueue.length}
       />
-      {isTrulyNewUser && !showOnboarding && !isAuthenticatedEmpty && (
-        <div className="relative overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-900 to-emerald-950/20 border border-emerald-500/10 rounded-2xl p-6 md:p-8 shadow-2xl">
-          {/* Decorative ambient light */}
-          <div className="absolute -right-16 -top-16 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-          
+
+      {isTrulyNewUser && !showOnboarding && !isAuthenticatedEmpty ? (
+        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/10 bg-gradient-to-br from-zinc-900 via-zinc-900 to-emerald-950/20 p-6 shadow-2xl md:p-8">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl" />
+
           <div className="max-w-xl space-y-4">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-500">
               Getting Started
             </span>
             <h2 className="text-2xl font-bold tracking-tight text-zinc-100">
               Welcome to Quran Recall
             </h2>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Your memory heatmap is currently empty. There are two powerful ways to build and track your Quran memorization:
+            <p className="text-sm leading-relaxed text-zinc-400">
+              Your memory heatmap is currently empty. There are two powerful ways
+              to build and track your Quran memorization:
             </p>
-            
-            <div className="grid gap-3 sm:grid-cols-2 py-2">
-              <div className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-4 space-y-1">
-                <p className="font-semibold text-xs text-emerald-400">1. Active Memorization</p>
-                <p className="text-zinc-500 text-[11px] leading-relaxed">
-                  Use our interactive trainer featuring the proven growing-window technique and memory-blur recall cycles.
+
+            <div className="grid gap-3 py-2 sm:grid-cols-2">
+              <div className="space-y-1 rounded-xl border border-zinc-800/60 bg-zinc-900/50 p-4">
+                <p className="text-xs font-semibold text-emerald-400">
+                  1. Active Memorization
+                </p>
+                <p className="text-[11px] leading-relaxed text-zinc-500">
+                  Use our interactive trainer featuring the proven growing-window
+                  technique and memory-blur recall cycles.
                 </p>
               </div>
-              <div className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-4 space-y-1">
-                <p className="font-semibold text-xs text-emerald-400">2. Passive Tracking</p>
-                <p className="text-zinc-500 text-[11px] leading-relaxed">
-                  Simply read on Quran.com and watch your heatmap and spaced-repetition revision cycles update in real-time.
+              <div className="space-y-1 rounded-xl border border-zinc-800/60 bg-zinc-900/50 p-4">
+                <p className="text-xs font-semibold text-emerald-400">
+                  2. Passive Tracking
+                </p>
+                <p className="text-[11px] leading-relaxed text-zinc-500">
+                  Simply read on Quran.com and watch your heatmap and
+                  spaced-repetition revision cycles update in real-time.
                 </p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Button 
+              <Button
                 onClick={() => router.push("/memorize")}
-                className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium shadow-lg hover:shadow-emerald-500/20"
+                className="bg-emerald-500 font-medium text-white shadow-lg hover:bg-emerald-600 hover:shadow-emerald-500/20"
               >
                 Start Memorizing Now
               </Button>
-              <p className="text-[11px] text-zinc-500 italic">
+              <p className="text-[11px] italic text-zinc-500">
                 Tip: Grey squares on the heatmap represent unmemorized verses.
               </p>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
+
       <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
         <div>
           {isAuthenticatedEmpty ? (
@@ -208,7 +222,12 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 </div>
-                <Button asChild variant="outline" size="sm" className="border-teal-200 bg-transparent text-teal-700 hover:bg-teal-100 dark:border-teal-700 dark:text-teal-200 dark:hover:bg-teal-900/30">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="border-teal-200 bg-transparent text-teal-700 hover:bg-teal-100 dark:border-teal-700 dark:text-teal-200 dark:hover:bg-teal-900/30"
+                >
                   <Link href="https://quran.com" target="_blank" rel="noreferrer">
                     Open Quran.com
                     <span aria-hidden="true">→</span>
@@ -217,9 +236,11 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : null}
-          <div className="flex items-center justify-between mb-3">
+
+          <div className="mb-3 flex items-center justify-between">
             <TrackSurahButton onSurahAdded={refreshData} />
           </div>
+
           <AyahHeatmap
             surahGroups={surahGroups}
             stats={stats}
@@ -228,12 +249,14 @@ export default function DashboardPage() {
             onSelectAyah={setSelectedAyahKey}
             selectedAyah={selectedAyahKey}
           />
+
           {isAuthenticatedEmpty ? (
             <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
               ● Sample data — start reading to see your progress
             </p>
           ) : null}
         </div>
+
         <div className="h-[600px] xl:h-auto">
           <RevisionQueue
             items={revisionQueue}
@@ -244,7 +267,7 @@ export default function DashboardPage() {
       </div>
 
       <AnimatePresence>
-        {selectedAyahKey && selectedAyah && (
+        {selectedAyahKey && selectedAyah ? (
           <AyahDetailPanel
             ayah={selectedAyah}
             surahName={surahName}
@@ -253,7 +276,7 @@ export default function DashboardPage() {
             onMarkRevised={markRevised}
             onSetDifficulty={setDifficulty}
           />
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   );
