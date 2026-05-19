@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen } from "lucide-react";
+import { AlertTriangle, BookOpen, MoonStar } from "lucide-react";
 
 import { AyahDetailPanel } from "@/components/dashboard/ayah-detail-panel";
 import { AyahHeatmap } from "@/components/dashboard/ayah-heatmap";
@@ -16,7 +16,29 @@ import { RevisionQueue } from "@/components/queue/RevisionQueue";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useHifdh } from "@/hooks/useHifdh";
-import type { VerseKey } from "@/types/hifdh";
+import type { SurahGroup, VerseKey } from "@/types/hifdh";
+
+function getAtRiskSurahs(surahGroups: SurahGroup[]): SurahGroup[] {
+  return [...surahGroups]
+    .filter((group) => group.trackedCount > 0 && (group.weakCount > 0 || group.reviewCount > 0))
+    .sort((left, right) => {
+      if (right.weakCount !== left.weakCount) return right.weakCount - left.weakCount;
+      if (right.reviewCount !== left.reviewCount) return right.reviewCount - left.reviewCount;
+      return left.surahStrength - right.surahStrength;
+    });
+}
+
+function getTonightRecommendation(surahGroups: SurahGroup[]): SurahGroup[] {
+  const atRisk = getAtRiskSurahs(surahGroups);
+  const medium = atRisk.filter(
+    (group) => group.surah.versesCount >= 11 && group.surah.versesCount <= 30,
+  );
+  const short = atRisk.filter((group) => group.surah.versesCount <= 10);
+  const long = atRisk.filter((group) => group.surah.versesCount > 30);
+
+  const preferred = medium.length > 0 ? medium : short.length > 0 ? short : long;
+  return preferred.slice(0, 2);
+}
 
 export default function DashboardPage() {
   const {
@@ -36,6 +58,7 @@ export default function DashboardPage() {
   const [sessionCount, setSessionCount] = useState(0);
   const [isClient, setIsClient] = useState(false);
   const [showWelcomeSync, setShowWelcomeSync] = useState(false);
+  const [showTonightPlan, setShowTonightPlan] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -114,6 +137,8 @@ export default function DashboardPage() {
   const isTrulyNewUser =
     stats && stats.strongCount + stats.reviewCount + stats.weakCount === 0;
   const isAuthenticatedEmpty = dataSource === "authenticated-empty";
+  const atRiskSurahs = getAtRiskSurahs(surahGroups);
+  const tonightRecommendations = getTonightRecommendation(surahGroups);
 
   return (
     <div className="relative space-y-8 overflow-hidden">
@@ -150,6 +175,105 @@ export default function DashboardPage() {
         healthScore={stats?.overallHealthScore ?? 0}
         revisionDue={revisionQueue.length}
       />
+
+      {!isLoading && !showOnboarding && atRiskSurahs.length > 0 ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 dark:border-amber-900/40 dark:bg-amber-950/20">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-amber-900 dark:text-amber-100">
+                  {Math.min(3, atRiskSurahs.length)} surahs are at risk of being forgotten
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-amber-800/80 dark:text-amber-100/80">
+                  {atRiskSurahs
+                    .slice(0, 3)
+                    .map((group) => group.surah.nameSimple)
+                    .join(", ")}
+                </p>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-amber-200 bg-transparent text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:text-amber-200 dark:hover:bg-amber-900/20"
+              onClick={() => {
+                const firstAyah = atRiskSurahs[0]?.ayahs.find(
+                  (ayah) => ayah.memoryState === "weak" || ayah.memoryState === "review",
+                );
+                if (firstAyah) setSelectedAyahKey(firstAyah.verseKey);
+              }}
+            >
+              Review most urgent
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {!isLoading && !showOnboarding && atRiskSurahs.length > 0 ? (
+        <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-5 dark:border-teal-900/40 dark:bg-teal-950/20">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300">
+                <MoonStar className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-teal-900 dark:text-teal-100">
+                  Pre-salah mode
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-teal-800/80 dark:text-teal-100/80">
+                  Surface 1-2 at-risk surahs that fit an Isha-length recitation tonight.
+                </p>
+              </div>
+            </div>
+
+            <Button
+              size="sm"
+              className="bg-teal-600 text-white hover:bg-teal-700"
+              onClick={() => setShowTonightPlan((value) => !value)}
+            >
+              What should I recite tonight?
+            </Button>
+          </div>
+
+          {showTonightPlan ? (
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {tonightRecommendations.length > 0 ? (
+                tonightRecommendations.map((group) => (
+                  <button
+                    key={group.surah.number}
+                    type="button"
+                    onClick={() => {
+                      const focusAyah =
+                        group.ayahs.find((ayah) => ayah.memoryState === "weak") ??
+                        group.ayahs.find((ayah) => ayah.memoryState === "review") ??
+                        group.ayahs[0];
+                      if (focusAyah) setSelectedAyahKey(focusAyah.verseKey);
+                    }}
+                    className="rounded-xl border border-teal-200 bg-white/70 p-4 text-left transition-colors hover:bg-white dark:border-teal-900/40 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/70"
+                  >
+                    <p className="font-medium text-teal-900 dark:text-teal-100">
+                      {group.surah.nameSimple}
+                    </p>
+                    <p className="mt-1 text-sm text-teal-800/80 dark:text-teal-100/80">
+                      {group.surah.versesCount} ayahs · {Math.round(group.surahStrength)}%
+                      strength
+                    </p>
+                  </button>
+                ))
+              ) : (
+                <p className="text-sm text-teal-800/80 dark:text-teal-100/80">
+                  Your at-risk surahs are either very short or very long tonight.
+                  The revision queue already has the best next ayahs for you.
+                </p>
+              )}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {isTrulyNewUser && !showOnboarding && !isAuthenticatedEmpty ? (
         <div className="relative overflow-hidden rounded-2xl border border-emerald-500/10 bg-gradient-to-br from-zinc-900 via-zinc-900 to-emerald-950/20 p-6 shadow-2xl md:p-8">
