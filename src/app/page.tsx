@@ -400,7 +400,7 @@ export default function LandingPage() {
             href="https://quran.com"
             target="_blank"
             rel="noreferrer"
-            className="text-teal-600 hover:underline"
+            className="text-green-600 hover:underline dark:text-green-400"
           >
             Quran Foundation
           </a>{" "}

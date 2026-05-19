@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="30" fill="#1D7A43" />
+  <path
+    d="M15 21.5C15 20.4 15.9 19.5 17 19.5H21.5C22.6 19.5 23.5 20.4 23.5 21.5V42.2C25.8 42.2 28.5 42.9 30.7 44.3L32 45.1L33.3 44.3C35.5 42.9 38.2 42.2 40.5 42.2V21.5C40.5 20.4 41.4 19.5 42.5 19.5H47C48.1 19.5 49 20.4 49 21.5V45C49 46.1 48.1 47 47 47H36.7C35.8 47 34.9 47.2 34.2 47.7L33 48.5C32.4 48.9 31.6 48.9 31 48.5L29.8 47.7C29.1 47.2 28.2 47 27.3 47H17C15.9 47 15 46.1 15 45V21.5Z"
+    fill="none"
+    stroke="#F4F1E8"
+    stroke-width="2.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M23.5 21.5V42.2"
+    fill="none"
+    stroke="#F4F1E8"
+    stroke-width="2.4"
+    stroke-linecap="round"
+    opacity="0.95"
+  />
+  <path
+    d="M40.5 21.5V42.2"
+    fill="none"
+    stroke="#F4F1E8"
+    stroke-width="2.4"
+    stroke-linecap="round"
+    opacity="0.95"
+  />
+  <path
+    d="M23.5 21.8C26 21.8 29.2 22.3 32 25.4C34.8 22.3 38 21.8 40.5 21.8"
+    fill="none"
+    stroke="#F4F1E8"
+    stroke-width="2.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M23.5 42.2C26.4 42.2 29.5 42.8 32 45.1C34.5 42.8 37.6 42.2 40.5 42.2"
+    fill="none"
+    stroke="#F4F1E8"
+    stroke-width="2.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M32 25.2V45"
+    fill="none"
+    stroke="#F4F1E8"
+    stroke-width="2.6"
+    stroke-linecap="round"
+  />
+</svg>
