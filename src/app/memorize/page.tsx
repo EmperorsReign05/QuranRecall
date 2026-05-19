@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, BookOpen, ChevronRight, CheckCircle2, Circle } from "lucide-react";
+import { Search, BookOpen, ChevronRight, Circle } from "lucide-react";
 import { SURAH_META } from "@/data/surahMeta";
 import { engagementStore } from "@/lib/engagementStore";
 

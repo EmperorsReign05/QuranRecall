@@ -75,6 +75,13 @@ export function useHifdh(): UseHifdhResult {
   useEffect(() => {
     let isMounted = true;
 
+    // Load local storage cache immediately to prevent flash of empty states
+    const cachedData = hifdhService.getDashboardData();
+    setData(cachedData);
+    if (cachedData.stats && cachedData.stats.totalTracked > 0) {
+      setIsLoading(false);
+    }
+
     async function loadData() {
       try {
         const meRes = await fetch("/api/auth/me");

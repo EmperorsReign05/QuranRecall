@@ -1,9 +1,12 @@
 "use client";
 
-import { BookOpen, Home } from "lucide-react";
+import { BookOpen, Home, Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -13,13 +16,34 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const isDark = mounted && resolvedTheme === "dark";
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-72 border-r bg-card lg:block">
       <div className="flex h-full flex-col p-5">
-        <Link href="/" className="font-serif text-2xl font-semibold tracking-normal">
-          Quran Recall
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/" className="font-serif text-2xl font-semibold tracking-normal">
+            Quran Recall
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Toggle theme"
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            className="h-9 w-9 text-zinc-400 hover:text-foreground"
+          >
+            {isDark ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Memorization health and revision planning.
         </p>

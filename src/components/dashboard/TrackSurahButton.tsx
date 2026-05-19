@@ -4,11 +4,7 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-interface TrackSurahButtonProps {
-  onSurahAdded?: () => void;
-}
-
-export function TrackSurahButton({ onSurahAdded }: TrackSurahButtonProps) {
+export function TrackSurahButton() {
   const router = useRouter();
 
   return (

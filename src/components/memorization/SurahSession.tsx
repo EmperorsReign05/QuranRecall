@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, RotateCcw, Eye, EyeOff, CheckCircle2, Type } from "lucide-react";
+import { ChevronLeft, RotateCcw, Eye, EyeOff, CheckCircle2, Type } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SURAH_META_MAP } from "@/data/surahMeta";
 import { useAyahContent } from "@/hooks/useAyahContent";

@@ -376,9 +376,9 @@ export default function DashboardPage() {
               selectedAyah={selectedAyahKey}
             />
 
-            {isAuthenticatedEmpty ? (
+            {isAuthenticatedEmpty && isTrulyNewUser ? (
               <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
-                ● Sample data — start reading to see your progress
+                ● Start reading on Quran.com to see your progress
               </p>
             ) : null}
           </div>

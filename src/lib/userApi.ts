@@ -119,7 +119,7 @@ export async function postReadingSession(
         },
         body: JSON.stringify({ verse_key: verseKey }),
       });
-      const text = await res.text();
+      await res.text();
       if (res.ok) return true;
     } catch (e) {
       console.error(`postReadingSession [${url}] error:`, e);

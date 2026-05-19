@@ -11,7 +11,7 @@ type SessionPayload = {
 
 async function fetchReadingSessions(
   accessToken: string,
-): Promise<{ sessions: ReadingSession[]; errorMessage?: string }> {
+): Promise<{ sessions: ReadingSession[]; status?: number; errorMessage?: string }> {
   const base = process.env.QURAN_USER_API_BASE;
   const clientId = process.env.QURAN_USER_CLIENT_ID;
 
@@ -36,6 +36,7 @@ async function fetchReadingSessions(
   if (!response.ok) {
     return {
       sessions: [],
+      status: response.status,
       errorMessage: `Reading sessions failed (${response.status}): ${bodyText}`,
     };
   }
@@ -106,7 +107,7 @@ async function fetchStreaks(accessToken: string): Promise<UserStreak> {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("qf_session");
@@ -121,10 +122,35 @@ export async function GET() {
       return NextResponse.json({ error: "Missing access token" }, { status: 401 });
     }
 
-    const [sessionResult, streaks] = await Promise.all([
+    let [sessionResult, streaks] = await Promise.all([
       fetchReadingSessions(session.accessToken),
       fetchStreaks(session.accessToken),
     ]);
+
+    if (sessionResult.status === 401) {
+      const refreshResponse = await fetch(new URL("/api/auth/refresh", request.url), {
+        method: "POST",
+        headers: { cookie: request.headers.get("cookie") || "" },
+      });
+
+      if (refreshResponse.ok) {
+        const refreshedCookieStore = await cookies();
+        const refreshedSessionCookie = refreshedCookieStore.get("qf_session");
+
+        if (refreshedSessionCookie) {
+          const refreshedSession = JSON.parse(refreshedSessionCookie.value) as {
+            accessToken?: string;
+          };
+
+          if (refreshedSession.accessToken) {
+            [sessionResult, streaks] = await Promise.all([
+              fetchReadingSessions(refreshedSession.accessToken),
+              fetchStreaks(refreshedSession.accessToken),
+            ]);
+          }
+        }
+      }
+    }
 
     if (sessionResult.errorMessage) {
       return NextResponse.json(

@@ -191,9 +191,13 @@ export function AyahHeatmap({
               <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
                 ● Live data from Quran.com
               </span>
+            ) : stats && stats.totalTracked > 0 ? (
+              <span className="text-sm font-medium text-teal-600 dark:text-teal-400">
+                ● Local cache data
+              </span>
             ) : (
               <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                ○ Sample data
+                ○ No tracked memorized ayahs
               </span>
             )}
           </div>
