@@ -4,7 +4,6 @@ import {
   ArrowRight,
   BookOpenText,
   HeartPulse,
-  Menu,
   Moon,
   Sparkles,
   Sun,
@@ -89,6 +88,15 @@ function LandingHeader() {
   }, []);
 
   const isDark = mounted && resolvedTheme === "dark";
+
+  // Filter navigation items: only show Dashboard and Memorize if authenticated
+  const visibleNavigation = navigation.filter((item) => {
+    if (item.href === "/dashboard") {
+      return mounted && isAuthenticated;
+    }
+    return true;
+  });
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/72 backdrop-blur-xl">
       <div className="container flex h-20 items-center justify-between gap-6">
@@ -100,7 +108,7 @@ function LandingHeader() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          {navigation.map((item) => (
+          {visibleNavigation.map((item) => (
             <Link
               key={item.label}
               href={item.href}
@@ -139,28 +147,6 @@ function LandingHeader() {
               >
                 Sign out
               </button>
-            </>
-          ) : null}
-
-          {mounted && !isLoading && !isAuthenticated ? (
-            <>
-              <Button
-                asChild
-                variant="ghost"
-                size="icon"
-                aria-label="Open app"
-                className="rounded-full md:hidden"
-              >
-                <Link href="/dashboard">
-                  <Menu className="h-5 w-5" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                className="hidden rounded-full bg-primary px-6 text-primary-foreground shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-primary/90 md:inline-flex"
-              >
-                <Link href="/dashboard">Open app</Link>
-              </Button>
             </>
           ) : null}
         </div>
