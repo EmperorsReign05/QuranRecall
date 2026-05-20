@@ -222,6 +222,16 @@ export function AyahDetailPanel({
                 </button>
               ))}
             </div>
+
+            <Button
+              asChild
+              variant="outline"
+              className="w-full text-teal-700 border-teal-200 hover:bg-teal-50 dark:text-teal-400 dark:border-teal-900/40 dark:hover:bg-teal-900/20"
+            >
+              <a href={`https://quran.com/${ayah.verseKey}`} target="_blank" rel="noopener noreferrer">
+                Read on Quran.com <span aria-hidden="true" className="ml-1">→</span>
+              </a>
+            </Button>
           </div>
 
           <div className="text-center mt-auto pt-4">

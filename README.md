@@ -52,7 +52,18 @@ Used to track and synchronize user reading history, streaks, and engagement metr
 - **Components**: shadcn/ui primitives, Radix UI
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
+- **PWA**: `@serwist/next`
 - **Package Manager**: npm
+
+---
+
+## Progressive Web App (PWA)
+
+Quran Recall is fully configured as a Progressive Web App, offering a native-like experience on desktop and mobile devices.
+
+- **Offline Caching**: Built with `@serwist/next`, the app precaches static assets and uses smart runtime caching strategies for a resilient offline-ready shell.
+- **Installable**: The app provides a valid web manifest (`src/app/manifest.ts`) and theme colors allowing users to install it directly to their home screens via Chrome, Safari, or Android.
+- **Native UI Integration**: iOS styling capabilities (`appleWebApp` metadata) ensure that the status bar blends seamlessly with the app's sanctuary theme.
 
 ---
 
