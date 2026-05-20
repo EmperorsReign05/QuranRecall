@@ -228,7 +228,7 @@ export function AyahDetailPanel({
               variant="outline"
               className="w-full text-teal-700 border-teal-200 hover:bg-teal-50 dark:text-teal-400 dark:border-teal-900/40 dark:hover:bg-teal-900/20"
             >
-              <a href={`https://quran.com/${ayah.verseKey}`} target="_blank" rel="noopener noreferrer">
+              <a href={`https://quran.com/${ayah.verseKey.split(':')[0]}`} target="_blank" rel="noopener noreferrer">
                 Read on Quran.com <span aria-hidden="true" className="ml-1">→</span>
               </a>
             </Button>
