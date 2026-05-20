@@ -404,7 +404,7 @@ export default function LandingPage() {
           >
             Quran Foundation
           </a>{" "}
-          Hackathon · 2025
+          Hackathon · 2026
         </p>
       </section>
 
