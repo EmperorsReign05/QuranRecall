@@ -17,6 +17,33 @@ The application tracks the user's reading history and applies an Ebbinghaus-deri
 
 ---
 
+## Quran Foundation API Integration
+
+Quran Recall utilizes the official **Quran Foundation APIs** to retrieve Quranic content and synchronize user progress.
+
+### 1. Content API (OAuth2 Client Credentials Flow)
+
+Used to fetch static surah metadata and verse texts.
+
+*   **Authentication**: Client Credentials grant using client credentials to obtain a short-lived token.
+*   **Endpoints Used**:
+    *   `GET /chapters?language=en`: Fetches surah directory metadata to populate dashboard and onboarding lists.
+    *   `GET /verses/by_chapter/{chapterNumber}`: Fetches verses (Arabic Uthmani/IndoPak scripts and English translations).
+    *   `GET /verses/by_key/{verseKey}`: Retrieves details for a specific verse key (e.g. `"2:255"`).
+
+### 2. User API (OAuth2 Authorization Code Flow with PKCE)
+
+Used to track and synchronize user reading history, streaks, and engagement metrics.
+
+*   **Authentication**: Three-legged OAuth2 flow with PKCE, managed via secure HTTP-only cookies.
+*   **Endpoints Used**:
+    *   `GET /reading-sessions`: Retrieves user reading sessions to drive the Ebbinghaus decay calculations.
+    *   `POST /reading-sessions`: Records new reading activity to synchronize progress back to Quran.com.
+    *   `GET /streaks`: Retrieves reading streaks for user dashboard statistics.
+    *   `GET /activity-days`: Retrieves daily reading activity and duration metrics.
+
+---
+
 ## Technical Stack
 
 - **Framework**: Next.js 15 (App Router)
