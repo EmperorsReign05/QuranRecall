@@ -364,7 +364,7 @@ export default function DashboardPage() {
             ) : null}
 
             <div className="mb-3 flex items-center justify-between">
-              <TrackSurahButton onSurahAdded={refreshData} />
+              <TrackSurahButton />
             </div>
 
             <AyahHeatmap
