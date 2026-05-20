@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { EB_Garamond, Manrope } from "next/font/google";
 import type { ReactNode } from "react";
 
@@ -16,9 +16,21 @@ const ebGaramond = EB_Garamond({
   variable: "--font-display",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#0f766e",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "Quran Recall",
   description: "A calm, beautiful, and distraction-free memorization health dashboard for Quran revision.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Quran Recall",
+  },
   openGraph: {
     title: "Quran Recall",
     description: "A calm, beautiful, and distraction-free memorization health dashboard for Quran revision.",
