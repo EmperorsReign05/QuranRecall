@@ -122,19 +122,19 @@ npm start
 
 ```text
 ├── src/
-│   ├── app/                 # Next.js pages, layouts, and API routes
-│   ├── components/          # Reusable UI components and feature-specific blocks
-│   ├── data/                # Static metadata (e.g., surah definitions)
-│   ├── hooks/               # Custom React hooks (auth, query hooks)
-│   ├── lib/                 # Core utilities (decay algorithm, api wrappers)
-│   └── types/               # TypeScript interface definitions
-├── public/                  # Static assets
-├── tailwind.config.ts       # Tailwind CSS configuration
-└── tsconfig.json            # TypeScript configuration
+│   ├── app/                 
+│   ├── components/          
+│   ├── data/                
+│   ├── hooks/               
+│   ├── lib/                 
+│   └── types/               
+├── public/                  
+├── tailwind.config.ts       
+└── tsconfig.json            
 ```
 
 ---
-
+<!--
 ## Quality Assurance
 
 ### Linting and Formatting
@@ -164,3 +164,5 @@ To verify TypeScript compilation and static typing:
 ```bash
 npx tsc --noEmit
 ```
+
+-->
