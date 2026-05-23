@@ -352,18 +352,6 @@ export function AyahHeatmap({
         </TooltipProvider>
       </CardContent>
 
-      <div className="flex items-center justify-end border-t p-4 text-xs text-zinc-500 dark:text-zinc-400">
-        <div className="flex items-center gap-2">
-          <span>Less</span>
-          <div className="flex gap-[3px]">
-            <div className="h-3 w-3 rounded-[2px] bg-zinc-200 dark:bg-zinc-800" />
-            <div className="h-3 w-3 rounded-[2px] bg-emerald-500 opacity-[0.45]" />
-            <div className="h-3 w-3 rounded-[2px] bg-emerald-500 opacity-70" />
-            <div className="h-3 w-3 rounded-[2px] bg-emerald-500" />
-          </div>
-          <span>More</span>
-        </div>
-      </div>
     </Card>
   );
 }

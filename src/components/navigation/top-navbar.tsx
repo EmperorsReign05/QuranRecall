@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Moon, Search, Sun, X, Home, BookOpen, BookMarked, CalendarDays, BarChart3, Settings } from "lucide-react";
+import { Menu, Moon, Search, Sun, X, Home, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -13,10 +13,6 @@ import { cn } from "@/lib/utils";
 const mobileNavItems = [
   { label: "Overview",       href: "/dashboard",  icon: Home },
   { label: "Memorize",       href: "/memorize",   icon: BookOpen, highlight: true },
-  { label: "Ayah Health",    href: "/dashboard",  icon: BookMarked },
-  { label: "Revision Queue", href: "/dashboard",  icon: CalendarDays },
-  { label: "Insights",       href: "/dashboard",  icon: BarChart3 },
-  { label: "Settings",       href: "/dashboard",  icon: Settings },
 ];
 
 export function TopNavbar({ compact = false }: { compact?: boolean }) {

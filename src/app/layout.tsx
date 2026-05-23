@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { EB_Garamond, Manrope } from "next/font/google";
+import { Amiri_Quran, EB_Garamond, Manrope } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -14,6 +14,12 @@ const manrope = Manrope({
 const ebGaramond = EB_Garamond({
   subsets: ["latin"],
   variable: "--font-display",
+});
+
+const amiriQuran = Amiri_Quran({
+  weight: "400",
+  subsets: ["arabic"],
+  variable: "--font-amiri",
 });
 
 export const viewport: Viewport = {
@@ -53,7 +59,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${manrope.variable} ${ebGaramond.variable}`}
+      className={`${manrope.variable} ${ebGaramond.variable} ${amiriQuran.variable}`}
     >
       <head>
       </head>

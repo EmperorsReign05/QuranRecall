@@ -96,12 +96,18 @@ export function useHifdh(): UseHifdhResult {
 
           if (!sessionsRes.ok) throw new Error("sessions fetch failed");
 
-          const { sessions, streaks: fetchedStreaks } = await sessionsRes.json() as {
+          const { sessions, streaks: fetchedStreaks, error } = await sessionsRes.json() as {
             sessions: unknown[];
             streaks: UserStreak;
+            error?: string;
           };
 
           if (!isMounted) return;
+
+          if (error) {
+            window.location.href = '/api/auth/login';
+            return;
+          }
 
           if (fetchedStreaks) setStreaks(fetchedStreaks);
 

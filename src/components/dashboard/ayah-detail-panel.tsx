@@ -131,8 +131,7 @@ export function AyahDetailPanel({
               <>
                 <p 
                   dir="rtl"
-                  className="text-right text-2xl leading-loose text-zinc-100 font-arabic"
-                  style={{ fontFamily: "'Amiri Quran', 'me_quran', serif" }}
+                  className="text-right text-3xl leading-[2.5] text-zinc-100 font-amiri"
                 >
                   {content.arabicText}
                 </p>
