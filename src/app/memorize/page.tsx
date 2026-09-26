@@ -85,6 +85,32 @@ export default function MemorizePage() {
             </section>
           )}
 
+          {/* Duas */}
+          <section className="mb-8">
+            <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+              Duas
+            </h2>
+            <div className="space-y-1">
+              <button
+                onClick={() => router.push(`/memorize/qunoot`)}
+                className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-left group border bg-transparent border-transparent hover:bg-white dark:hover:bg-zinc-800/50 hover:border-zinc-200 dark:hover:border-zinc-700/50 hover:shadow-sm"
+              >
+                <div className="text-zinc-400 group-hover:text-zinc-500 dark:group-hover:text-zinc-300 transition-colors shrink-0">
+                  <BookOpen className="w-4 h-4 text-emerald-500" />
+                </div>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate text-zinc-800 dark:text-zinc-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Dua Qunoot</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">Witr Supplication</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" />
+                </div>
+              </button>
+            </div>
+          </section>
+
           {/* Beginner surahs */}
           <section className="mb-8">
             <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">

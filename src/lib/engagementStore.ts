@@ -147,9 +147,19 @@ export class EngagementStore {
     );
 
     for (const verseKey of verseKeys) {
-      const [surahValue, ayahValue] = verseKey.split(":");
-      const surahNumber = Number(surahValue);
-      const ayahNumber = Number(ayahValue);
+      let surahNumber: number;
+      let ayahNumber: number;
+
+      if (verseKey.startsWith("qunoot-")) {
+        surahNumber = 999;
+        const [, partStr] = verseKey.split(":");
+        ayahNumber = Number(partStr);
+      } else {
+        const [surahValue, ayahValue] = verseKey.split(":");
+        surahNumber = Number(surahValue);
+        ayahNumber = Number(ayahValue);
+      }
+
       const existing = byVerseKey.get(verseKey);
 
       if (!Number.isFinite(surahNumber) || !Number.isFinite(ayahNumber)) {

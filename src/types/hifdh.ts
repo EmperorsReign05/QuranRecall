@@ -1,6 +1,6 @@
-import type { VerseKey } from "@quranjs/api";
+import type { VerseKey as QuranVerseKey } from "@quranjs/api";
 
-export type { VerseKey };
+export type VerseKey = QuranVerseKey | `qunoot-${string}:${number}`;
 
 export type MemoryState = "strong" | "review" | "weak" | "untracked";
 
