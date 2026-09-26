@@ -56,8 +56,8 @@ export const DUA_QUNOOT_VERSIONS: Record<string, DuaQunootVersion> = {
       },
       {
         id: "qunoot-v1:6",
-        arabicText: "إِنَّكَ تَقْضِي وَلاَ يُقْضَى عَلَيْكَ",
-        arabicIndoPakText: "إِنَّکَ تَقْضِی وَلاَ یُقْضَى عَلَیۡکَ",
+        arabicText: "فَإِنَّكَ تَقْضِي وَلَا يُقْضَىٰ عَلَيْكَ",
+        arabicIndoPakText: "فَإِنَّکَ تَقْضِی وَلَا یُقْضَىٰ عَلَیۡکَ",
         transliteration: "fa Innaka taqdi wa la yuqda Alaik",
         translationText: "Indeed You decree, and none can pass decree upon You",
       },

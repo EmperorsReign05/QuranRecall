@@ -360,7 +360,7 @@ export default function DuaSession(props: DuaSessionProps) {
           <p className="text-zinc-500 text-sm mb-1">Witr Supplication</p>
           <h1 className="text-4xl font-bold mb-1">{surah.title}</h1>
           <p className="text-4xl font-arabic text-zinc-400 mt-2">{""}</p>
-          <p className="text-sm text-zinc-600 mt-3">{surah.parts.length} ayahs</p>
+          <p className="text-sm text-zinc-600 mt-3">{surah.parts.length} lines</p>
         </div>
 
         {/* Narration Selection */}
@@ -420,10 +420,10 @@ export default function DuaSession(props: DuaSessionProps) {
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 mb-8 text-sm text-zinc-650 dark:text-zinc-400 space-y-2 shadow-sm">
           <p className="font-semibold text-zinc-800 dark:text-zinc-200 text-sm">Growing Window Method</p>
           <ol className="space-y-1.5 text-xs leading-relaxed list-decimal list-inside text-zinc-500">
-            <li>Read each verse aloud <strong className="text-zinc-750 dark:text-zinc-300">{cfg.lookReps} times</strong> while looking</li>
+            <li>Read each line aloud <strong className="text-zinc-750 dark:text-zinc-300">{cfg.lookReps} times</strong> while looking</li>
             <li>Recite from memory <strong className="text-zinc-750 dark:text-zinc-300">{cfg.recallReps} times</strong> (text blurred)</li>
-            <li>Recite all verses from verse 1 to current, <strong className="text-zinc-750 dark:text-zinc-300">{cfg.windowReps} times</strong></li>
-            <li>Repeat for each new verse — your window keeps growing</li>
+            <li>Recite all lines from line 1 to current, <strong className="text-zinc-750 dark:text-zinc-300">{cfg.windowReps} times</strong></li>
+            <li>Repeat for each new line — your window keeps growing</li>
           </ol>
         </div>
 
@@ -431,7 +431,7 @@ export default function DuaSession(props: DuaSessionProps) {
           className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-5 text-base shadow-lg hover:shadow-emerald-500/20"
           onClick={() => startLearnPhase(1)}
         >
-          Start with Ayah 1
+          Start with Line 1
         </Button>
       </div>
     );
@@ -443,12 +443,12 @@ export default function DuaSession(props: DuaSessionProps) {
       <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
           <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
-          <h1 className="text-3xl font-bold mb-2">Surah complete!</h1>
+          <h1 className="text-3xl font-bold mb-2">Dua complete!</h1>
           <p className="text-zinc-400 mb-1">{surah.title}</p>
-          <p className="text-zinc-600 text-sm mb-8">All {surah.parts.length} ayahs recorded in your heatmap.</p>
+          <p className="text-zinc-600 text-sm mb-8">All {surah.parts.length} lines recorded in your heatmap.</p>
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={() => setPhase("overview")}>
-              <RotateCcw className="w-4 h-4 mr-2" /> Redo surah
+              <RotateCcw className="w-4 h-4 mr-2" /> Redo dua
             </Button>
             <Button
               className="bg-emerald-500 hover:bg-emerald-600 text-white"
@@ -470,9 +470,9 @@ export default function DuaSession(props: DuaSessionProps) {
   }[phase as string] ?? "";
 
   const phaseDesc = {
-    "learn-look": "Read the verse out loud while looking at the text.",
+    "learn-look": "Read the line out loud while looking at the text.",
     "learn-recall": "Cover the text in your mind and recite from memory.",
-    "window-review": `Recite all verses 1–${currentAyah} together from memory.`,
+    "window-review": `Recite all lines 1–${currentAyah} together from memory.`,
   }[phase as string] ?? "";
 
   const phaseReps = {
@@ -505,7 +505,7 @@ export default function DuaSession(props: DuaSessionProps) {
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div className="text-center">
-          <p className="text-xs text-zinc-500">{surah.title} · Ayah {currentAyah}</p>
+          <p className="text-xs text-zinc-500">{surah.title} · Line {currentAyah}</p>
           <p className="text-sm font-semibold text-emerald-400">{phaseLabel}</p>
         </div>
         
