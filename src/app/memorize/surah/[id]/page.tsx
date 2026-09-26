@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import SurahSession from '@/components/memorization/SurahSession';
 import { notFound } from 'next/navigation';
 
@@ -10,5 +11,9 @@ export default async function MemorizeSurahPage({ params }: { params: Promise<{ 
     return null;
   }
 
-  return <SurahSession surahNumber={surahId} />;
+  return (
+    <Suspense fallback={null}>
+      <SurahSession surahNumber={surahId} />
+    </Suspense>
+  );
 }

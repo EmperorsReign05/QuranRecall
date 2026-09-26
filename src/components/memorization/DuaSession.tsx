@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, RotateCcw, Eye, EyeOff, CheckCircle2, Type } from "lucide-react";
+import { ChevronLeft, RotateCcw, Eye, EyeOff, CheckCircle2, Type, Share2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DUA_QUNOOT_VERSIONS } from "@/data/duaQunoot";
 import { useAyahContent } from "@/hooks/useAyahContent";
@@ -214,10 +214,20 @@ interface DuaSessionProps { duaId?: string; }
 
 export default function DuaSession(props: DuaSessionProps) {
   const router = useRouter();
-  const [duaId, setDuaId] = useState<"v1" | "v2">((props.duaId as "v1" | "v2") ?? "v1");
+  const searchParams = useSearchParams();
+
+  const [duaId, setDuaId] = useState<"v1" | "v2">(() => {
+    const v = searchParams?.get("version");
+    if (v === "v1" || v === "v2") return v;
+    return (props.duaId as "v1" | "v2") ?? "v1";
+  });
   const surah = DUA_QUNOOT_VERSIONS[duaId];
 
-  const [method, setMethod] = useState<Method>("standard");
+  const [method, setMethod] = useState<Method>(() => {
+    const m = searchParams?.get("method");
+    if (m === "standard" || m === "quick") return m;
+    return "standard";
+  });
   const [script, setScript] = useState<ArabicScript>("uthmani");
   const [phase, setPhase] = useState<Phase>("overview");
   const [currentAyah, setCurrentAyah] = useState(1);
@@ -305,16 +315,50 @@ export default function DuaSession(props: DuaSessionProps) {
     engagementStore.setDifficulty(key, 2);
   };
 
+  const [copied, setCopied] = useState(false);
+  const handleShare = async () => {
+    const url = `${window.location.origin}${window.location.pathname}?version=${duaId}&method=${method}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Memorize Dua Qunoot",
+          text: `Join me in memorizing Dua Qunoot (${surah.narrator}) using the growing window method!`,
+          url: url,
+        });
+      } catch (err) {
+        navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   // ── Overview ────────────────────────────────────────────────────────────────
   if (phase === "overview") {
     return (
       <div className="max-w-lg mx-auto py-16 px-6">
-        <button
-          onClick={() => router.push("/memorize")}
-          className="flex items-center gap-1 text-zinc-500 hover:text-zinc-300 text-sm mb-8 transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" /> All Surahs
-        </button>
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={() => router.push("/memorize")}
+            className="flex items-center gap-1 text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" /> All Surahs
+          </button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+            className="text-xs rounded-full bg-white dark:bg-zinc-900 shadow-sm border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+          >
+            {copied ? <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5 mr-1.5 text-emerald-500" />}
+            {copied ? "Copied!" : "Share Link"}
+          </Button>
+        </div>
 
         <div className="text-center mb-10">
           <p className="text-zinc-500 text-sm mb-1">Witr Supplication</p>

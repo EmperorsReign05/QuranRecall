@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, RotateCcw, Eye, EyeOff, CheckCircle2, Type } from "lucide-react";
+import { ChevronLeft, RotateCcw, Eye, EyeOff, CheckCircle2, Type, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SURAH_META_MAP } from "@/data/surahMeta";
 import { useAyahContent } from "@/hooks/useAyahContent";
@@ -207,10 +207,19 @@ interface SurahSessionProps {
 
 export default function SurahSession({ surahNumber }: SurahSessionProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const surah = SURAH_META_MAP.get(surahNumber);
 
-  const [method, setMethod] = useState<Method>("standard");
-  const [script, setScript] = useState<ArabicScript>("uthmani");
+  const [method, setMethod] = useState<Method>(() => {
+    const m = searchParams?.get("method");
+    if (m === "standard" || m === "quick") return m;
+    return "standard";
+  });
+  const [script, setScript] = useState<ArabicScript>(() => {
+    const s = searchParams?.get("script");
+    if (s === "uthmani" || s === "indopak") return s;
+    return "uthmani";
+  });
   const [phase, setPhase] = useState<Phase>("overview");
   const [currentAyah, setCurrentAyah] = useState(1);
   const [rep, setRep] = useState(0);
@@ -219,15 +228,15 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
   const [peekActive, setPeekActive] = useState(false);
   const [windowBlurred, setWindowBlurred] = useState(true);
 
-  // Load preferences from local storage
+  // Load preferences from local storage if not in URL
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !searchParams?.get("script")) {
       const storedScript = localStorage.getItem("hifdh_script");
       if (storedScript === "uthmani" || storedScript === "indopak") {
         setScript(storedScript as ArabicScript);
       }
     }
-  }, []);
+  }, [searchParams]);
 
   const changeScript = (newScript: ArabicScript) => {
     setScript(newScript);
@@ -305,16 +314,50 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
     engagementStore.setDifficulty(key, 2);
   };
 
+  const [copied, setCopied] = useState(false);
+  const handleShare = async () => {
+    const url = `${window.location.origin}${window.location.pathname}?method=${method}&script=${script}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Memorize Surah ${surah?.nameSimple}`,
+          text: `Join me in memorizing Surah ${surah?.nameSimple} using the growing window method!`,
+          url: url,
+        });
+      } catch (err) {
+        navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   // ── Overview ────────────────────────────────────────────────────────────────
   if (phase === "overview") {
     return (
       <div className="max-w-lg mx-auto py-16 px-6">
-        <button
-          onClick={() => router.push("/memorize")}
-          className="flex items-center gap-1 text-zinc-500 hover:text-zinc-300 text-sm mb-8 transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" /> All Surahs
-        </button>
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={() => router.push("/memorize")}
+            className="flex items-center gap-1 text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" /> All Surahs
+          </button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+            className="text-xs rounded-full bg-white dark:bg-zinc-900 shadow-sm border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+          >
+            {copied ? <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5 mr-1.5 text-emerald-500" />}
+            {copied ? "Copied!" : "Share Link"}
+          </Button>
+        </div>
 
         <div className="text-center mb-10">
           <p className="text-zinc-500 text-sm mb-1">{surah.translatedName}</p>
