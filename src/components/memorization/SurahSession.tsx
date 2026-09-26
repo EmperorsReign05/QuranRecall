@@ -497,10 +497,10 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
   return (
     <div className="min-h-screen flex flex-col pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-zinc-800">
+      <div className="relative flex items-center justify-center px-4 py-4 border-b border-zinc-800">
         <button
           onClick={() => setPhase("overview")}
-          className="text-zinc-500 hover:text-zinc-300 transition-colors p-1"
+          className="absolute left-4 text-zinc-500 hover:text-zinc-300 transition-colors p-1"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -512,7 +512,7 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
         {/* Dynamic script toggle */}
         <button
           onClick={() => changeScript(script === "uthmani" ? "indopak" : "uthmani")}
-          className="text-xs flex items-center gap-1 border border-zinc-250 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1.5 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all font-medium shadow-sm"
+          className="absolute right-4 text-xs flex items-center gap-1 border border-zinc-250 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1.5 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all font-medium shadow-sm"
           title="Toggle Arabic script style"
         >
           <Type className="w-3.5 h-3.5 text-emerald-500" />
@@ -522,7 +522,7 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
 
       {/* Phase description */}
       <div className="px-6 py-4 text-center">
-        <p className="text-sm text-zinc-500">{phaseDesc}</p>
+        <p className="text-base font-medium text-zinc-400">{phaseDesc}</p>
       </div>
 
       {/* Arabic text */}

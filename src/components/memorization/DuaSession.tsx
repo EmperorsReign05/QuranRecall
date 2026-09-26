@@ -497,10 +497,10 @@ export default function DuaSession(props: DuaSessionProps) {
   return (
     <div className="min-h-screen flex flex-col pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-zinc-800">
+      <div className="relative flex items-center justify-center px-4 py-4 border-b border-zinc-800">
         <button
           onClick={() => setPhase("overview")}
-          className="text-zinc-500 hover:text-zinc-300 transition-colors p-1"
+          className="absolute left-4 text-zinc-500 hover:text-zinc-300 transition-colors p-1"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -510,12 +510,11 @@ export default function DuaSession(props: DuaSessionProps) {
         </div>
         
         {/* Dynamic script toggle - Hidden for Duas as per request */}
-        <div className="w-[88px]" />
       </div>
 
       {/* Phase description */}
       <div className="px-6 py-4 text-center">
-        <p className="text-sm text-zinc-500">{phaseDesc}</p>
+        <p className="text-base font-medium text-zinc-400">{phaseDesc}</p>
       </div>
 
       {/* Arabic text */}
