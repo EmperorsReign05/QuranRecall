@@ -17,6 +17,10 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        scheherazade: ["var(--font-scheherazade)", "serif"],
+        amiri: ["var(--font-amiri)", "serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

@@ -34,11 +34,13 @@ function AyahDisplay({
   verseKey,
   blurred,
   showTranslation = true,
+  showTransliteration = true,
   script = "uthmani",
 }: {
   verseKey: VerseKey;
   blurred?: boolean;
   showTranslation?: boolean;
+  showTransliteration?: boolean;
   script?: ArabicScript;
 }) {
   const { content, isLoading, error } = useAyahContent(verseKey);
@@ -71,9 +73,16 @@ function AyahDisplay({
       >
         {textToDisplay}
       </div>
-      {showTranslation && !blurred && (
+      {showTransliteration && content.transliterationText && (
+        <p className={`mt-6 text-sm font-medium text-emerald-700 dark:text-emerald-400 max-w-lg mx-auto transition-all duration-500 select-none ${
+          blurred ? "blur-sm pointer-events-none opacity-50" : ""
+        }`}>
+          {content.transliterationText}
+        </p>
+      )}
+      {showTranslation && (
         <p
-          className="mt-4 text-sm text-zinc-400 leading-relaxed max-w-lg mx-auto"
+          className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-lg mx-auto"
           dangerouslySetInnerHTML={{ __html: content.translationText }}
         />
       )}
@@ -218,21 +227,13 @@ export default function DuaSession(props: DuaSessionProps) {
   const [peekActive, setPeekActive] = useState(false);
   const [windowBlurred, setWindowBlurred] = useState(true);
 
-  // Load preferences from local storage
+  // Load preferences from local storage - Disabled for Duas
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedScript = localStorage.getItem("hifdh_script");
-      if (storedScript === "uthmani" || storedScript === "indopak") {
-        setScript(storedScript as ArabicScript);
-      }
-    }
+    setScript("uthmani"); // Force uthmani for Duas
   }, []);
 
   const changeScript = (newScript: ArabicScript) => {
-    setScript(newScript);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("hifdh_script", newScript);
-    }
+    // Disabled
   };
 
   const cfg = METHOD_CONFIG[method];
@@ -344,30 +345,11 @@ export default function DuaSession(props: DuaSessionProps) {
           </div>
         </div>
 
-        {/* Script Selection */}
+        {/* Script Selection - Commented out as requested
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 mb-4 shadow-sm">
-          <p className="text-xs text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wider mb-3">Arabic Script Style</p>
-          <div className="grid grid-cols-2 gap-2">
-            {(["uthmani", "indopak"] as ArabicScript[]).map((scr) => (
-              <button
-                key={scr}
-                onClick={() => changeScript(scr)}
-                className={`p-3 rounded-xl text-left transition-all border ${
-                  script === scr
-                    ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
-                    : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-800/30 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700"
-                }`}
-              >
-                <p className={`font-semibold text-sm ${script === scr ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-700 dark:text-zinc-300"}`}>
-                  {scr === "uthmani" ? "Standard (Uthmani)" : "Indo-Pak Script"}
-                </p>
-                <p className={`text-[10px] mt-0.5 ${script === scr ? "text-emerald-600 dark:text-emerald-500" : "text-zinc-500"}`}>
-                  {scr === "uthmani" ? "Common Medina copy" : "Standard South Asian copy"}
-                </p>
-              </button>
-            ))}
-          </div>
+          ...
         </div>
+        */}
 
         {/* Method selector */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 mb-6 shadow-sm">
@@ -487,15 +469,8 @@ export default function DuaSession(props: DuaSessionProps) {
           <p className="text-sm font-semibold text-emerald-400">{phaseLabel}</p>
         </div>
         
-        {/* Dynamic script toggle */}
-        <button
-          onClick={() => changeScript(script === "uthmani" ? "indopak" : "uthmani")}
-          className="text-xs flex items-center gap-1 border border-zinc-250 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1.5 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all font-medium shadow-sm"
-          title="Toggle Arabic script style"
-        >
-          <Type className="w-3.5 h-3.5 text-emerald-500" />
-          {script === "uthmani" ? "Uthmani" : "Indo-Pak"}
-        </button>
+        {/* Dynamic script toggle - Hidden for Duas as per request */}
+        <div className="w-[88px]" />
       </div>
 
       {/* Phase description */}
@@ -526,7 +501,8 @@ export default function DuaSession(props: DuaSessionProps) {
                 <AyahDisplay
                   verseKey={verseKey}
                   blurred={shouldBlur}
-                  showTranslation={phase === "learn-look"}
+                  showTranslation={phase === "learn-look" || phase === "learn-recall"}
+                  showTransliteration={phase === "learn-look" || phase === "learn-recall"}
                   script={script}
                 />
               )}

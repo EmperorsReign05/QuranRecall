@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { AyahContent, VerseKey } from "@/types/hifdh";
 
-// Re-use the same cache from useAyahContent
-const contentCache = new Map<VerseKey, AyahContent>();
+// Re-use the same cache from useAyahContent (or separate, but named v3 to avoid HMR issues)
+const contentCacheV3 = new Map<VerseKey, AyahContent>();
 
 export function useMultiAyahContent(verseKeys: VerseKey[]) {
   const [contents, setContents] = useState<(AyahContent | null)[]>([]);
@@ -16,10 +16,10 @@ export function useMultiAyahContent(verseKeys: VerseKey[]) {
       return;
     }
 
-    const missingKeys = verseKeys.filter((k) => !contentCache.has(k));
+    const missingKeys = verseKeys.filter((k) => !contentCacheV3.has(k));
 
     if (missingKeys.length === 0) {
-      setContents(verseKeys.map((k) => contentCache.get(k) ?? null));
+      setContents(verseKeys.map((k) => contentCacheV3.get(k) ?? null));
       return;
     }
 
@@ -28,17 +28,17 @@ export function useMultiAyahContent(verseKeys: VerseKey[]) {
 
     Promise.all(
       missingKeys.map((key) =>
-        fetch(`/api/ayah/${key}?v=2`)
+        fetch(`/api/ayah/${key}?v=3`)
           .then((r) => (r.ok ? r.json() as Promise<AyahContent> : null))
           .then((data) => {
-            if (data) contentCache.set(key, data);
+            if (data) contentCacheV3.set(key, data);
             return data;
           })
           .catch(() => null)
       )
     ).then(() => {
       if (isMounted) {
-        setContents(verseKeys.map((k) => contentCache.get(k) ?? null));
+        setContents(verseKeys.map((k) => contentCacheV3.get(k) ?? null));
         setIsLoading(false);
       }
     });

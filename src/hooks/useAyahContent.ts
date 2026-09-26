@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { AyahContent, VerseKey } from "@/types/hifdh";
 
-const contentCache = new Map<VerseKey, AyahContent>();
+const contentCacheV3 = new Map<VerseKey, AyahContent>();
 
 export function useAyahContent(verseKey: VerseKey | null) {
   const [content, setContent] = useState<AyahContent | null>(null);
@@ -16,8 +16,8 @@ export function useAyahContent(verseKey: VerseKey | null) {
       return;
     }
 
-    if (contentCache.has(verseKey)) {
-      setContent(contentCache.get(verseKey)!);
+    if (contentCacheV3.has(verseKey)) {
+      setContent(contentCacheV3.get(verseKey)!);
       setIsLoading(false);
       setError(null);
       return;
@@ -27,13 +27,13 @@ export function useAyahContent(verseKey: VerseKey | null) {
     setIsLoading(true);
     setError(null);
 
-    fetch(`/api/ayah/${verseKey}?v=2`)
+    fetch(`/api/ayah/${verseKey}?v=3`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch ayah content");
         return res.json();
       })
       .then((data: AyahContent) => {
-        contentCache.set(verseKey, data);
+        contentCacheV3.set(verseKey, data);
         if (isMounted) {
           setContent(data);
           setIsLoading(false);

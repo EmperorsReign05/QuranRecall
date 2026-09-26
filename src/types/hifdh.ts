@@ -63,4 +63,5 @@ export interface AyahContent {
   arabicText: string;
   arabicIndoPakText?: string;
   translationText: string;
+  transliterationText?: string;
 }

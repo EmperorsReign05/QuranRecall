@@ -35,14 +35,15 @@ export async function GET(
     const content = {
       verseKey: verseKey as VerseKey,
       arabicText: part.arabicText,
-      arabicIndoPakText: part.arabicText,
+      arabicIndoPakText: part.arabicIndoPakText || part.arabicText,
       translationText: part.translationText,
+      transliterationText: part.transliteration,
     };
 
     return NextResponse.json(content, {
       status: 200,
       headers: {
-        'Cache-Control': 'public, max-age=86400'
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
       }
     });
   }
