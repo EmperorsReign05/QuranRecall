@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, RotateCcw, Eye, EyeOff, CheckCircle2, Type, Share2, Check } from "lucide-react";
+import { ChevronLeft, RotateCcw, Eye, EyeOff, CheckCircle2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DUA_QUNOOT_VERSIONS } from "@/data/duaQunoot";
 import { useAyahContent } from "@/hooks/useAyahContent";
@@ -236,15 +236,33 @@ export default function DuaSession(props: DuaSessionProps) {
   // States to control active peeking
   const [peekActive, setPeekActive] = useState(false);
   const [windowBlurred, setWindowBlurred] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}${window.location.pathname}?version=${duaId}&method=${method}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Memorize Dua Qunoot",
+          text: `Join me in memorizing Dua Qunoot (${surah.narrator}) using the growing window method!`,
+          url: url,
+        });
+      } catch {
+        navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   // Load preferences from local storage - Disabled for Duas
   useEffect(() => {
     setScript("uthmani"); // Force uthmani for Duas
   }, []);
-
-  const changeScript = (newScript: ArabicScript) => {
-    // Disabled
-  };
 
   const cfg = METHOD_CONFIG[method];
   const verseKey = `qunoot-${duaId}:${currentAyah}` as VerseKey;
@@ -313,28 +331,6 @@ export default function DuaSession(props: DuaSessionProps) {
     const key = `qunoot-${duaId}:${ayahNum}` as VerseKey;
     engagementStore.markRevised(key);
     engagementStore.setDifficulty(key, 2);
-  };
-
-  const [copied, setCopied] = useState(false);
-  const handleShare = async () => {
-    const url = `${window.location.origin}${window.location.pathname}?version=${duaId}&method=${method}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Memorize Dua Qunoot",
-          text: `Join me in memorizing Dua Qunoot (${surah.narrator}) using the growing window method!`,
-          url: url,
-        });
-      } catch (err) {
-        navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    } else {
-      navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
   };
 
   // ── Overview ────────────────────────────────────────────────────────────────

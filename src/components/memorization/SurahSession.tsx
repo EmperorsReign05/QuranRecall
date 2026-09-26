@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, RotateCcw, Eye, EyeOff, CheckCircle2, Type, Share2 } from "lucide-react";
+import { ChevronLeft, RotateCcw, Eye, EyeOff, CheckCircle2, Share2, Type } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SURAH_META_MAP } from "@/data/surahMeta";
 import { useAyahContent } from "@/hooks/useAyahContent";
@@ -227,6 +227,28 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
   // States to control active peeking
   const [peekActive, setPeekActive] = useState(false);
   const [windowBlurred, setWindowBlurred] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}${window.location.pathname}?method=${method}&script=${script}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Memorize Surah ${surah?.nameSimple}`,
+          text: `Join me in memorizing Surah ${surah?.nameSimple} using the growing window method!`,
+          url: url,
+        });
+      } catch {
+        navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   // Load preferences from local storage if not in URL
   useEffect(() => {
@@ -312,28 +334,6 @@ export default function SurahSession({ surahNumber }: SurahSessionProps) {
     const key = `${surahNumber}:${ayahNum}` as VerseKey;
     engagementStore.markRevised(key);
     engagementStore.setDifficulty(key, 2);
-  };
-
-  const [copied, setCopied] = useState(false);
-  const handleShare = async () => {
-    const url = `${window.location.origin}${window.location.pathname}?method=${method}&script=${script}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `Memorize Surah ${surah?.nameSimple}`,
-          text: `Join me in memorizing Surah ${surah?.nameSimple} using the growing window method!`,
-          url: url,
-        });
-      } catch (err) {
-        navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    } else {
-      navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
   };
 
   // ── Overview ────────────────────────────────────────────────────────────────
