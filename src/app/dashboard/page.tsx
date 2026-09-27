@@ -232,13 +232,19 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <Button
-                size="sm"
-                className="bg-teal-600 text-white hover:bg-teal-700"
-                onClick={() => setShowTonightPlan((value) => !value)}
-              >
-                What should I recite tonight?
-              </Button>
+              <div className="flex items-center gap-2">
+                <Link href="/memorize/qunoot" className="flex items-center justify-center gap-2 rounded-md bg-white/70 px-3 py-2 text-sm font-medium text-teal-700 transition-colors hover:bg-white dark:bg-teal-900/40 dark:text-teal-300 dark:hover:bg-teal-900/60 shadow-sm border border-teal-200 dark:border-teal-800">
+                  <BookOpen className="h-4 w-4" />
+                  Memorize Dua Qunoot
+                </Link>
+                <Button
+                  size="sm"
+                  className="bg-teal-600 text-white hover:bg-teal-700"
+                  onClick={() => setShowTonightPlan((value) => !value)}
+                >
+                  What should I recite tonight?
+                </Button>
+              </div>
             </div>
 
             {showTonightPlan ? (
@@ -367,12 +373,6 @@ export default function DashboardPage() {
               <TrackSurahButton />
             </div>
             
-            <div className="mb-6 grid grid-cols-1 gap-3">
-              <Link href="/memorize/qunoot" className="flex items-center justify-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 p-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors shadow-sm">
-                <BookOpen className="h-4 w-4 text-emerald-500" />
-                Memorize Dua Qunoot
-              </Link>
-            </div>
 
             <AyahHeatmap
               surahGroups={surahGroups}
